@@ -6,7 +6,7 @@ import pandas as pd
 def getLinks(html, patternStr):
     with open(html) as file:
         raw = file.read()
-    soup = BeautifulSoup(raw)
+    soup = BeautifulSoup(raw, features='lxml')
 
     link = []
     pattern = re.compile(patternStr)
@@ -41,13 +41,13 @@ def generateRaceUrlsFromLinks(dayList):
 
 
 def saveRaceUrlsFromFiles():
-    files = os.listdir('./yearhtml')
+    files = os.listdir('./../yearhtml')
     urls = []
     for file in files:
-        dayLinks = getLinks('./yearhtml/'+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
+        dayLinks = getLinks('./../yearhtml/'+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
         urls += generateRaceUrlsFromLinks(dayLinks)
     
-    with open('raceUrls.csv', 'w') as file:
+    with open('./../excel/raceUrls.csv', 'w') as file:
         for item in urls:
             file.write('%s\n' % item)
 
