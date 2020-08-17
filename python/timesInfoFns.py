@@ -26,7 +26,6 @@ def parseTimeInfo(timeLines):
 
 
 def parseFractionalTimes(line):
-    print(line)
 
     fullSearch = re.search(r'(Fractional Times: ([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*))? Final Time: ([0-9.:]*)', line)
 

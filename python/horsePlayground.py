@@ -9,6 +9,7 @@ if re.search('python$', os.getcwd()) is None:
 from genInfoFns import parseGenInfo
 from horseInfoFns import parseHorseInfo
 from timesInfoFns import parseTimeInfo
+from betInfoFns import parseBetInfo
 
 
 def parseFullDay(fullChart):
@@ -84,6 +85,7 @@ def parseRace(raceChart):
     genItems = parseGenInfo(raceChart[:genInd])
     horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
     timesItems = parseTimeInfo(raceChart[timesInd[0]:timesInd[1]])
+    betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
 
     genRepeated = pd.concat([genItems] * horseItems.shape[0])
     timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
@@ -91,6 +93,7 @@ def parseRace(raceChart):
     horseItems.reset_index(drop=True, inplace=True)
     genRepeated.reset_index(drop=True, inplace=True)
     timesRepeated.reset_index(drop=True, inplace=True)
+    
 
     outDF = pd.concat([genRepeated, horseItems, timesRepeated], axis = 1)
     
@@ -113,4 +116,4 @@ with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') a
 with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') as file:
     test2 = file.readlines()
 
-jack = parseFullDay(test2)
+#jack = parseFullDay(test2)
