@@ -27,7 +27,8 @@ def parseFullDay(fullChart):
     dayDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','breed','distance','surface','segment1','segment2','segment3','segment4','segment5','segments'])
 
     for i in range(len(newRaceInd) - 1):
-        raceDF = parseRace(fullChart[newRaceInd[i]:newRaceInd[i+1]])
+
+        raceDF = parseRace(fullChart[newRaceInd[i]:(min(newRaceInd[i+1], len(fullChart)))])
         if type(raceDF) == str:
             continue
         else:
@@ -60,10 +61,12 @@ def parseRace(raceChart):
     if genItems == 'Error':
         return 'Error - Quarter Horse'
     """
+    if len(raceChart) < horseInd[1]:
+        jack = 1
     horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
     #endItems = parseEndInfo(raceChart[endInd:])
 
-    genDF = pd.DataFrame(horseItems, index=[0])
+    genDF = pd.DataFrame(horseItems)
     
     return genDF
 
@@ -97,28 +100,44 @@ def parseHorseTop(line):
     return out
 
 def parseHorseBottom(line):
-    fullSearch = re.search(r'''(\d?\d[A-Z][a-z]{2}\d\d) *([A-Z])* *(\d?\d) *([^0-9])(\d?\d?\d) *([A-Za-z])*
-     *(\d?\d) +(\d?\d) +(\d?\d) +(\d?\d) +(\d?\d) +(\d?\d) +(\d?\d) +([0-9]+\.\d\d)(.*)$''',
-     line)
-    
-    lastRaceDate = fullSearch.group(1)
-    lastRaceTrack = fullSearch.group(2)
-    program = fullSearch.group(3)
-    horseAndJockey = fullSearch.group(4)
-    weight = fullSearch.group(5)
-    m_e = fullSearch.group(6)
-    pp = fullSearch.group(7)
-    seg1 = fullSearch.group(8)
-    seg2 = fullSearch.group(9)
-    seg3 = fullSearch.group(10)
-    seg4 = fullSearch.group(11)
-    seg5 = fullSearch.group(12)
-    segFin = fullSearch.group(13)
-    odds = fullSearch.group(14)
-    comments = fullSearch.group(15)
+    print(line)
 
-    out = [lastRaceDate,lastRaceTrack,program,horseAndJockey,weight,m_e,
-    seg1,seg2,seg3,seg4,seg5,segFin,odds,comments]
+    fullSearch = re.search(r'(\d?\d[A-Z][a-z]{2}\d\d *[A-Z]*|---) *(\d?\d) *([^0-9]+)(\d?\d?\d»?) *([A-Za-z0-9-]*) *(\d?\d) +(\d?\d) +(\d?\d)* *(\d?\d)* *(\d?\d)* *(\d?\d)* *(\d?\d)* *([0-9]+\.\d\d) *(.*)$', line)   
+    
+    lastRaceDateTrack = fullSearch.group(1)
+    program = fullSearch.group(2)
+    horseAndJockey = fullSearch.group(3)
+    weight = fullSearch.group(4)
+    m_e = fullSearch.group(5)
+    pp = fullSearch.group(6)
+    seg1 = fullSearch.group(7)
+    seg2 = fullSearch.group(8)
+    seg3 = fullSearch.group(9)
+    seg4 = fullSearch.group(10)
+    seg5 = fullSearch.group(11)
+    segFin = fullSearch.group(12)
+    odds = fullSearch.group(13)
+    comments = fullSearch.group(14)
+
+    if re.search('-', lastRaceDateTrack) is not None:
+        lastRaceDate = lastRaceDateTrack
+        lastRaceTrack = lastRaceDateTrack
+    else:
+        dateTrackSearch = re.search(r'(\d?\d[A-Z][a-z]{2}\d\d) *([A-Z]*)', lastRaceDateTrack)
+        lastRaceDate = dateTrackSearch.group(1)
+        lastRaceTrack = dateTrackSearch.group(2)
+
+    horseAndJockeySearch = re.search(r'([^0-9]*) *\(([A-Za-z., ]*)\) *$', horseAndJockey)
+    horseName = re.sub(' ', '', horseAndJockeySearch.group(1))
+    jockey = horseAndJockeySearch.group(2)
+
+    out = [lastRaceDate,lastRaceTrack,program,horseName,jockey,weight,m_e,seg1,seg2,seg3,seg4,seg5,segFin,odds,comments]
 
 
     return out
+
+
+with open('./../charts/SUN-1.12.19.txt') as file:
+    ex4 = file.readlines() #import another
+
+test = parseFullDay(ex4)
