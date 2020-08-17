@@ -7,7 +7,7 @@ def pdf2xml(pdfDir, xmlDir):
     if xmlDir[-1] != '/':
         xmlDir += '/'
     files = os.listdir(pdfDir)
-    print('Converting ' + len(files) + 'files')
+    print('Converting ', str(len(files)), 'files')
     for file in files:
         address = "'" + pdfDir + file + "'"
         output = "'" + xmlDir + re.sub('pdf', 'txt', file) + "'"
