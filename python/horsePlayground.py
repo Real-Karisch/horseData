@@ -89,13 +89,15 @@ def parseRace(raceChart):
 
     genRepeated = pd.concat([genItems] * horseItems.shape[0])
     timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
+    betRepeated = pd.concat([betItems] * horseItems.shape[0])
 
     horseItems.reset_index(drop=True, inplace=True)
     genRepeated.reset_index(drop=True, inplace=True)
     timesRepeated.reset_index(drop=True, inplace=True)
+    betRepeated.reset_index(drop=True, inplace=True)
     
 
-    outDF = pd.concat([genRepeated, horseItems, timesRepeated], axis = 1)
+    outDF = pd.concat([genRepeated, horseItems, timesRepeated, betRepeated], axis = 1)
     
     """
     betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])

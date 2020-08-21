@@ -13,6 +13,7 @@ def parseBetInfo(betLines):
         ind += 1
 
     wpsPool = parseWPS(betLines[wpsInd])
+    betDict['wpsPool'] = wpsPool
 
     firstPlaceItems = parseFirstPlace([betLines[i] for i in [betStartInd, betStartInd + 1]])
     secondPlaceitems = parseSecondPlace([betLines[i] for i in [betStartInd, betStartInd + 2]])
@@ -29,22 +30,26 @@ def parseBetInfo(betLines):
 
     index = 0
     for line in additionalLines:
-        activeAdditional = parseAdditionalBetLines(line)
-        keywordSearch = re.search('(Exacta|Trifecta|Superfecta|Daily Double)', activeAdditional[0])
+        keywordSearch = re.search('(Exacta|Trifecta|Superfecta|Daily Double)', line)
+        
         if keywordSearch is not None:
             keyword = keywordSearch.group(1).lower()
-            print(line)
+
+            activeAdditional = parseAdditionalBetLines(line)
+
             betDict[keyword + 'Buyin'] = re.search('(\$\d\.\d\d)', activeAdditional[0]).group(1)
             betDict[keyword + 'Finish'] = activeAdditional[1]
-            betDict[keyword + 'Payout'] = activeAdditional[2]
-            betDict[keyword + 'Pool'] = activeAdditional[3]
+            betDict[keyword + 'Payout'] = activeAdditional[3]
+            betDict[keyword + 'Pool'] = activeAdditional[4]
 
     betDF = pd.DataFrame(betDict, index = [0])
 
     return betDF
 
 def parseWPS(line):
-    return 0
+    fullSearch = re.search(r'Total WPS Pool: \$([0-9,]*)', line)
+
+    return fullSearch.group(1)
 
 def parseFirstPlace(lines):
     header = lines[0]
@@ -52,11 +57,11 @@ def parseFirstPlace(lines):
 
     labelSearch = re.search(r'Pgm Horse Win (Place)? ?(Show)?', header)
     if labelSearch.group(1) is None:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d)()() ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d)()() ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
     elif labelSearch.group(2) is None:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d)() ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d)() ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
     else:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
 
     out = []
 
@@ -71,11 +76,11 @@ def parseSecondPlace(lines):
 
     labelSearch = re.search(r'Pgm Horse Win (Place)? ?(Show)?', header)
     if labelSearch.group(1) is None:
-        fullSearch = re.search(r'\d?\d .+()() ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+()() ([0-9.$ A-Za-z,]* [0-9-/]* \d?\d?\d\.\d\d [0-9,]*)$', line)
     elif labelSearch.group(2) is None:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d)() ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d)() ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
     else:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
 
     out = []
 
@@ -85,29 +90,30 @@ def parseSecondPlace(lines):
     return out
 
 def parseThirdPlace(lines):
+    
     header = lines[0]
     line = lines[1]
 
     labelSearch = re.search(r'Pgm Horse Win (Place)? ?(Show)?', header)
     if labelSearch.group(1) is None or labelSearch.group(2) is None:
-        fullSearch = re.search(r'\d?\d .+() (?=\$\d\.\d\d)([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+() (?=\$\d\.\d\d)([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
     else:
-        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-]* \d?\d?\d\.\d\d [0-9,]*)$', line)
+        fullSearch = re.search(r'\d?\d .+ (\d?\d\.\d\d) ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?\d?\d?\d\.\d\d [0-9,]*)$', line)
 
     out = []
 
-    for i in [1, 3]:
+    for i in range(1,3):
         out.append(fullSearch.group(i))
 
     return out
 
 def parseAdditionalBetLines(line):
 
-    fullSearch = re.search(r'([0-9.$ A-Za-z,]*) ([0-9-]*) (\d?\d?\d\.\d\d) ([0-9,]*)$', line)
+    fullSearch = re.search(r'([0-9.$ A-Za-z,]*) ([0-9-/]*) (\([0-9A-Za-z ]+\) )?(\d?\d?\d\.\d\d) ([0-9,]*)$', line)
 
     out = []
 
-    for i in range(1,5):
+    for i in range(1,6):
         out.append(fullSearch.group(i))
 
     return out
