@@ -10,6 +10,8 @@ from genInfoFns import parseGenInfo
 from horseInfoFns import parseHorseInfo
 from timesInfoFns import parseTimeInfo
 from betInfoFns import parseBetInfo
+from runlineInfoFns import parseRunlineInfo
+from endInfoFns import parseEndInfo
 
 
 def parseFullDay(fullChart):
@@ -86,6 +88,8 @@ def parseRace(raceChart):
     horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
     timesItems = parseTimeInfo(raceChart[timesInd[0]:timesInd[1]])
     betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
+    runlineItems = parseRunlineInfo(raceChart[runLineInd[0]:runLineInd[1]])
+    endItems = parseEndInfo(raceChart[endInfoInd:])
 
     genRepeated = pd.concat([genItems] * horseItems.shape[0])
     timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
@@ -95,9 +99,10 @@ def parseRace(raceChart):
     genRepeated.reset_index(drop=True, inplace=True)
     timesRepeated.reset_index(drop=True, inplace=True)
     betRepeated.reset_index(drop=True, inplace=True)
+    runlineItems.reset_index(drop=True, inplace=True)
     
 
-    outDF = pd.concat([genRepeated, horseItems, timesRepeated, betRepeated], axis = 1)
+    outDF = pd.concat([genRepeated, horseItems, timesRepeated, betRepeated, runlineItems], axis = 1)
     
     """
     betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
