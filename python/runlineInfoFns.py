@@ -6,7 +6,7 @@ def parseRunlineInfo(runlineLines):
 
     numHorses = int(len(lines) / 2)
 
-    runlineDF = pd.DataFrame(columns=['rlPgm', 'rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2','rlPlaceSeg3',
+    runlineDF = pd.DataFrame(columns=['program', 'rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2','rlPlaceSeg3',
                                     'rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceFin',
                                     'rlLengthsFin'])
 
@@ -18,14 +18,21 @@ def parseRunlineInfo(runlineLines):
         topItems = parseRunlineTopLine(activeHorse[0])
         bottomItems = parseRunlineBottomLine(activeHorse[1])
 
-        runlineDict['rlLengthsSeg1'] = topItems[0]
-        runlineDict['rlLengthsSeg2'] = topItems[1]
-        runlineDict['rlLengthsSeg3'] = topItems[2]
-        runlineDict['rlLengthsSeg4'] = topItems[3]
-        runlineDict['rlLengthsSeg5'] = topItems[4]
-        runlineDict['rlLengthsSeg6'] = topItems[5]
+        #if all 6 segments have lengths
+        if [x for x in topItems if x == ''] == []:
+            runlineDict['rlLengthsSeg1'] = topItems[0] #fill in the first segment with the first length
+            startInd = 1 #filling in the remaining lengths will follow with the next element
+        else:
+            runlineDict['rlLengthsSeg1'] = '' #otherwise it will be "Start" and won't have any lengths associated
+            startInd = 0 #fill in remaining elements starting from the beginning of the list
 
-        runlineDict['rlPgm'] = bottomItems[0]
+        runlineDict['rlLengthsSeg2'] = topItems[startInd]
+        runlineDict['rlLengthsSeg3'] = topItems[startInd + 1]
+        runlineDict['rlLengthsSeg4'] = topItems[startInd + 2]
+        runlineDict['rlLengthsSeg5'] = topItems[startInd + 3]
+        runlineDict['rlLengthsSeg6'] = topItems[startInd + 4]
+
+        runlineDict['program'] = bottomItems[0]
         runlineDict['rlPlaceSeg1'] = bottomItems[1]
         runlineDict['rlPlaceSeg2'] = bottomItems[2]
         runlineDict['rlPlaceSeg3'] = bottomItems[3]
