@@ -3,10 +3,12 @@ import os
 import re
 import pandas as pd
 
-os.chdir('./python/')
+if re.search('python$', os.getcwd()) is None:
+    os.chdir('./python/')
 
 from genInfoFns import parseGenInfo
 from horseInfoFns import parseHorseInfo
+from timesInfoFns import parseTimeInfo
 
 
 def parseFullDay(fullChart):
@@ -81,16 +83,18 @@ def parseRace(raceChart):
     
     genItems = parseGenInfo(raceChart[:genInd])
     horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
+    timesItems = parseTimeInfo(raceChart[timesInd[0]:timesInd[1]])
 
     genRepeated = pd.concat([genItems] * horseItems.shape[0])
+    timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
 
     horseItems.reset_index(drop=True, inplace=True)
     genRepeated.reset_index(drop=True, inplace=True)
+    timesRepeated.reset_index(drop=True, inplace=True)
 
-    outDF = pd.concat([genRepeated, horseItems], axis = 1)
-
+    outDF = pd.concat([genRepeated, horseItems, timesRepeated], axis = 1)
+    
     """
-    timesItems = parseTimingInfo(raceChart[timesInd[0]:timesInd[1]])
     betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
     runLineItems = parseRunLineInfo(raceChart[runLineInd[0]:runLineInd[1]])
     endItems = parseEndInfo(raceChart[endInfoInd:])
