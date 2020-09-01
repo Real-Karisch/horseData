@@ -1,21 +1,20 @@
 import re
 import pandas as pd
 
-def parseGenInfo(genLines, trackRecordInd):
+def parseGenInfo(genLines):
 
     dfDict = {}
     
     dfDict['trackName'], dfDict['month'], dfDict['day'], dfDict['year'], dfDict['raceNum'] = parseLine1(genLines[0])
-    dfDict['breed'] = parseLine2(genLines[1])
-    if dfDict['breed'] == 'QuarterHorse':
-        return 'Error'
-    dfDict['distance'], dfDict['surface'] = parseDistanceSurface(genLines[trackRecordInd])
-    for line in genLines[trackRecordInd+1:]:
-        if re.search('Weather: *[A-Za-z] *Track:', line) is not None:
+    
+    for line in genLines[0:]:
+        if re.search('Track Record:', line) is not None:
+            dfDict['distance'], dfDict['surface'] = parseDistanceSurface(line)
+        elif re.search('Weather: [A-Za-z]+ Track:', line) is not None:
             dfDict['weather'], dfDict['conditions'] = parseWeatherConditions(line)
-        elif re.search('Off at: *[A-Za-z] *Start:', line) is not None:
+        elif re.search('Off at: [0-9:]+ Start:', line) is not None:
             dfDict['startTime'], dfDict['startNote'] = parseStart(line)
-        elif re.search('Last *Raced *Pgm', line) is not None:
+        elif re.search('Last Raced Pgm', line) is not None:
             dfDict['segment1'], dfDict['segment2'], dfDict['segment3'], dfDict['segment4'], dfDict['segment5'] = parseSegments(line)
 
     if dfDict['segment3'] == '':
@@ -26,23 +25,25 @@ def parseGenInfo(genLines, trackRecordInd):
         dfDict['segments'] = 4
     else:
         dfDict['segments'] = 5
-        
-    return dfDict
+
+    genInfoItems = pd.DataFrame(dfDict, index = [0])
+
+    return genInfoItems
 
 
 def parseLine1(line):
 
-    fullSearch = re.search(r'([^-]*)\-([^-]*)\-([^-]*)$', line)
+    fullSearch = re.search(r' *([^-]+) - ([^-]+) - (.*)', line)
     trackNameRaw = fullSearch.group(1)
     dateRaw = fullSearch.group(2)
     raceNumRaw = fullSearch.group(3)
 
     #track name -> abbreviated name
-    trackNameFull = re.sub('[^A-Za-z]', '', trackNameRaw)
+    trackNameFull = re.sub('[^A-Za-z ]', '', trackNameRaw)
     trackName = trackLongToShort[trackNameFull]
 
     #date
-    dateSearch = re.search(r'([A-Za-z]*)(\d?\d),(\d\d\d\d)', dateRaw)
+    dateSearch = re.search(r'([A-Za-z]*) (\d?\d), (\d\d\d\d)', dateRaw)
     monthRaw = dateSearch.group(1)
     month = monthNameToNumber[monthRaw]
     day = dateSearch.group(2)
@@ -56,23 +57,21 @@ def parseLine1(line):
     return out
 
 def parseLine2(line):
-    breedRaw = re.search(r'-(.*)$', line).group(1)
+    breedRaw = re.search(r'- (.*)$', line).group(1)
     breed = re.sub('[^A-Za-z]', '', breedRaw)
     return breed
 
 def parseDistanceSurface(line):
     fullSearch = re.search(r'([ A-Za-z]+)(?=Track)', line).group(0)
-    fullSearch = re.sub(r'[^A-Za-z]', '', fullSearch)
-    specSearch = re.match(r'(([A-Z][a-z]*)*)(?=OnThe)OnThe([A-Z][a-z]*)', fullSearch)
-    distanceRaw, surface = [specSearch.group(1), specSearch.group(3)]
+    specSearch = re.match(r' (.*) (?=On The)On The ([A-Z][a-z]*)', fullSearch)
+    distanceRaw, surface = [specSearch.group(1), specSearch.group(2)]
 
     out = [distanceRaw, surface]
 
     return out
 
 def parseWeatherConditions(line):
-    print(line)
-    fullSearch = re.search(r'Weather: *([A-Z][a-z]*) *Track: *([A-Z][a-z]*)', line)
+    fullSearch = re.search(r'Weather: ([A-Z][a-z]*) Track: ([A-Z][a-z]*)', line)
     weather = fullSearch.group(1)
     conditions = fullSearch.group(2)
 
@@ -81,7 +80,7 @@ def parseWeatherConditions(line):
     return out
 
 def parseStart(line):
-    fullSearch = re.search(r'Off at: *(\d?\d:\d\d) *Start: *([A-Z0-9][a-z0-9 ]*)', line)
+    fullSearch = re.search(r'Off at: (\d?\d:\d\d) Start: ([A-Z0-9][a-z0-9 ]*)', line)
     startTime = fullSearch.group(1)
     startNote = fullSearch.group(2)
 
@@ -91,7 +90,7 @@ def parseStart(line):
 
 def parseSegments(line):
 
-    fullSearch = re.search(r'PP *([A-Za-z0-9/]+) *([A-Za-z0-9/]*) *([A-Za-z0-9/]*) *([A-Za-z0-9/]*) *([A-Za-z0-9/]*) *Fin', line)
+    fullSearch = re.search(r'PP ([A-Za-z0-9/]+) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?Fin', line)
     segment1 = fullSearch.group(1)
     segment2 = fullSearch.group(2)
     segment3 = fullSearch.group(3)
@@ -102,7 +101,7 @@ def parseSegments(line):
 
 trackLongToShort = {}
 trackShortToLong = {}
-tracksDF = pd.read_csv('./../excel/tracks_v02.csv', delimiter=',', header=None)
+tracksDF = pd.read_csv('./../excel/tracks_v03.csv', delimiter=',', header=None)
 for i in range(tracksDF.shape[0]):
     trackLongToShort[tracksDF.iloc[i,1]] = tracksDF.iloc[i,0]
     trackShortToLong[tracksDF.iloc[i,0]] = tracksDF.iloc[i,1]
