@@ -63,7 +63,7 @@ def parseLine2(line):
 
 def parseDistanceSurface(line):
     fullSearch = re.search(r'([ A-Za-z]+)(?=Track)', line).group(0)
-    specSearch = re.match(r' (.*) (?=On The)On The ([A-Z][a-z]*)', fullSearch)
+    specSearch = re.match(r' (.*) (?=On The)On The ([A-Z][a-z ]*) ', fullSearch)
     distanceRaw, surface = [specSearch.group(1), specSearch.group(2)]
 
     out = [distanceRaw, surface]

@@ -1,76 +1,112 @@
-from bs4 import BeautifulSoup
+import sys
+import os
 import re
+import pandas as pd
 
-"""
-function to return all the unique rows found in a single race pdf, sorted by page number and line number
+os.chdir('./python/')
 
-input: soupObj, a BeautifulSoup object of the parsed xml of a race pdf
-output: a list of dicts, each representing a different page, each mapping a particular line in the pdf to a line in the output txt
-"""
-def uniqueXmlRows(soupObj):
-    pageList = soupObj.find_all('page')
+from genInfoFns import parseGenInfo
+from horseInfoFns import parseHorseInfo
 
-    pages = []
-    for i in range(len(pageList)):
-        page = pageList[i]
-        spanList = page.find_all('span')
 
-        row = []
-        for span in spanList:
-            bbox = span.get('bbox')
-            bboxSearch = re.search('\d+ (\d+) \d+ (\d+)', bbox)
-            row.append(int(bboxSearch.group(1)))
+def parseFullDay(fullChart):
+    newRaceInd = [-1] #first index will be 0 after conversion (controls for out of index error later)
+    newRaceTest = 'Copyright 2020 Equibase Company LLC. All Rights Reserved.'
+    for i in range(len(fullChart)):
+        if re.search(newRaceTest, fullChart[i]) is not None: #check for the expression that signifies end of race
+            newRaceInd.append(i)
 
-        rowUnique = sorted(list(set(row)))
-        rowIndex = list(range(len(rowUnique)))
+    dayDF = pd.DataFrame(columns=['trackName', 'month', 'day', 'year', 'raceNum', 'distance', 'surface',
+       'weather', 'conditions', 'startTime', 'startNote', 'segment1',
+       'segment2', 'segment3', 'segment4', 'segment5', 'segments',
+       'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack',
+       'lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight',
+       'm_e', 'placePP', 'placeSeg1', 'lengthsSeg1', 'placeSeg2',
+       'lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4',
+       'placeSeg5', 'lengthsSeg5', 'placeSeg6', 'lengthsSeg6', 'odds',
+       'comments'])
 
-        rowDict = dict(zip(rowUnique,rowIndex))
-        pages.append(rowDict)
+    for i in range(len(newRaceInd) - 1):
 
-    return pages
+        raceDF = parseRace(fullChart[newRaceInd[i] + 1:newRaceInd[i + 1]])
 
-"""
-function to generate a txt file from the xml of a pdf of a result chart from equibase
-inputs:
-    soupObj: a BeautifulSoup object
-    outputFile: a string address for the output txt
-outputs a txt file in the system at the address provided
-"""
-def createTxtFromXml(soupObj, outputFile):
-    lines = uniqueXmlRows(soupObj)
+        dayDF = pd.concat([dayDF, raceDF]) #loop over chunks of the file, each chunk representing a full race
 
-    pageList = soupObj.find_all('page')
-    txt = []
+    return dayDF
 
-    for i in range(len(pageList)):
-        page = pageList[i]
+def parseRace(raceChart):
 
-        lastColInd = [0] * len(lines[i])
-        pageTxt = [''] * len(lines[i])
+    cnt = 0
 
-        spanList = page.find_all('span')
-        for span in spanList:
-            charList = span.find_all('char')
-            for char in charList:
-                bbox = char.get('bbox')
-                c = char.get('c')
-                bboxSearch = re.search('(\d+) (\d+) (\d+) \d+', bbox)
-                beginCol = int(bboxSearch.group(1))
-                pdfRow = int(bboxSearch.group(2))
-                endCol = int(bboxSearch.group(3))
-                txtRow = lines[i][pdfRow]
+    raceDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','segment1','segment2','segment3','segment4','segment5','segments',
+        'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack','lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight','m_e', 'placePP', 
+        'placeSeg1', 'lengthsSeg1', 'placeSeg2','lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4','placeSeg5', 'lengthsSeg5', 'placeSeg6',
+        'lengthsSeg6', 'odds', 'comments'])
 
-                if beginCol == lastColInd[txtRow]:
-                    pageTxt[txtRow] += c
-                else:
-                    pageTxt[txtRow] += ' ' + c
+    #loop to find indexes for different parse sections
+    for line in raceChart:
+        if re.search('Cancelled - ', line) is not None: #check for cancelled race first, if cancelled, return empty DF
+            return raceDF
+        elif re.search('- Quarter Horse', line) is not None: #also do not need to process quarter horses
+            return raceDF
+        elif re.search('Last Raced Pgm', line) is not None: #everything before this falls under "general info"
+            genInd = cnt + 1
+            horseInd = [cnt + 1]
+        elif re.search('Fractional Times:|Final Time:', line) is not None: #after general info, need to process info for each horse
+            horseInd.append(cnt)
+            timesInd = [cnt]
+        elif re.search('Run-Up: ', line) is not None: #after horses, timing and runup info
+            timesInd.append(cnt + 1)
+            betInd = [cnt + 1]
+        elif re.search('Past Performance Running Line Preview', line) is not None: #after timing, betting info and additional horse info
+            betInd.append(cnt)
+            runLineInd = [cnt]
+        elif re.search('Trainers: ', line) is not None: #finally, need to do trainers, owners and other ending info
+            runLineInd.append(cnt)
+            endInfoInd = cnt
+        cnt += 1
+    """
+    print(raceChart[:genInd])
+    print('++++++++++++++++++++++++++++++++++++')
+    print(raceChart[horseInd[0]:horseInd[1]])
+    print('++++++++++++++++++++++++++++++++++++')
+    print(raceChart[timesInd[0]:timesInd[1]])
+    print('++++++++++++++++++++++++++++++++++++')
+    print(raceChart[betInd[0]:betInd[1]])
+    print('++++++++++++++++++++++++++++++++++++')
+    print(raceChart[runLineInd[0]:runLineInd[1]])
+    print('++++++++++++++++++++++++++++++++++++')
+    print(raceChart[endInfoInd:])
+    """
+    
+    genItems = parseGenInfo(raceChart[:genInd])
+    horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
 
-                lastColInd[txtRow] = endCol
-        
-        txt += pageTxt
+    genRepeated = pd.concat([genItems] * horseItems.shape[0])
 
-    txt = [x for x in txt if x != '']
+    horseItems.reset_index(drop=True, inplace=True)
+    genRepeated.reset_index(drop=True, inplace=True)
 
-    with open(outputFile, 'w') as file:
-        for line in txt:
-            file.write('%s\n' % line)
+    outDF = pd.concat([genRepeated, horseItems], axis = 1)
+
+    """
+    timesItems = parseTimingInfo(raceChart[timesInd[0]:timesInd[1]])
+    betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
+    runLineItems = parseRunLineInfo(raceChart[runLineInd[0]:runLineInd[1]])
+    endItems = parseEndInfo(raceChart[endInfoInd:])
+    """
+
+    return outDF
+    #genDF = pd.DataFrame(horseItems)
+    
+    #return genDF
+
+    #make df row, append to df, and return
+
+
+with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') as file:
+    test1 = file.readlines()
+with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') as file:
+    test2 = file.readlines()
+
+jack = parseFullDay(test2)
