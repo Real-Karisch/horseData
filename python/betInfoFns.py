@@ -2,6 +2,8 @@ import re
 import pandas as pd
 
 def parseBetInfo(betLines):
+    betDict = {}
+
     ind = 0
     for line in betLines:
         if re.search('Total WPS Pool', line) is not None:
@@ -15,15 +17,22 @@ def parseBetInfo(betLines):
     secondPlaceitems = parseSecondPlace(betLines[betStartInd + 2])
     thirdPlaceItems = parseThirdPlace(betLines[betStartInd + 3])
 
+    betDict['wpsPool'] = wpsPool
+    betDict['firstWinPayout'] = firstPlaceItems[0]
+
     additionalBetItems = []
     for line in betlines[(betStartInd + 4):]:
         additionalBetItems += parseAdditionalBetLines(line)
+
+    
 
     #################### stopping here #########################
     return 0
 
 def parseWPS(line):
-    return 0
+    fullSearch = re.search(r'Total WPS Pool: \$([0-9,]+)', line)
+    wpsPool = re.sub('[^0-9]', '', fullSearch.group(1))
+    return wpsPool
 
 def parseFirstPlace(line):
     return 0
