@@ -47,6 +47,8 @@ def parseRace(raceChart):
 
     cnt = 0
 
+    raceDF = pd.DataFrame()
+
     #loop to find indexes for different parse sections
     for line in raceChart:
         if re.search('Cancelled - ', line) is not None: #check for cancelled race first, if cancelled, return empty DF
@@ -99,4 +101,4 @@ with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') a
 with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') as file:
     test2 = file.readlines()
 
-jack = parseFullDay(test2)
+#jack = parseFullDay(test2)
