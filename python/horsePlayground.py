@@ -102,6 +102,3 @@ with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') a
     test2 = file.readlines()
 
 #jack = parseFullDay(test2)
-
-
-#PENIS
