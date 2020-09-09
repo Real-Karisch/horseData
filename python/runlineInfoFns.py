@@ -6,9 +6,8 @@ def parseRunlineInfo(runlineLines):
 
     numHorses = int(len(lines) / 2)
 
-    runlineDF = pd.DataFrame(columns=['program', 'rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2','rlPlaceSeg3',
-                                    'rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceFin',
-                                    'rlLengthsFin'])
+    #set up empty dataframe
+    runlineDF = pd.DataFrame()
 
     for i in [x*2 for x in list(range(numHorses))]:
         runlineDict = {}

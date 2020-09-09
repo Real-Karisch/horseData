@@ -37,24 +37,6 @@ def parseBetInfo(betLines):
 
             activeAdditional = parseAdditionalBetLines(line)
 
-<<<<<<< HEAD
-    betDict['wpsPool'] = wpsPool
-    betDict['firstWinPayout'] = firstPlaceItems[0]
-
-    additionalBetItems = []
-    for line in betlines[(betStartInd + 4):]:
-        additionalBetItems += parseAdditionalBetLines(line)
-
-    
-
-    #################### stopping here #########################
-    return 0
-
-def parseWPS(line):
-    fullSearch = re.search(r'Total WPS Pool: \$([0-9,]+)', line)
-    wpsPool = re.sub('[^0-9]', '', fullSearch.group(1))
-    return wpsPool
-=======
             betDict[keyword + 'Buyin'] = re.search('(\$\d\.\d\d)', activeAdditional[0]).group(1)
             betDict[keyword + 'Finish'] = activeAdditional[1]
             betDict[keyword + 'Payout'] = activeAdditional[3]
@@ -85,7 +67,6 @@ def parseFirstPlace(lines):
 
     for i in range(1, 5):
         out.append(fullSearch.group(i))
->>>>>>> 47120050558c48699b29b9e7c1f73aa4528b111b
 
     return out
 

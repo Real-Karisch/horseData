@@ -21,15 +21,19 @@ def parseFullDay(fullChart):
         if re.search(newRaceTest, fullChart[i]) is not None: #check for the expression that signifies end of race
             newRaceInd.append(i)
 
-    dayDF = pd.DataFrame(columns=['trackName', 'month', 'day', 'year', 'raceNum', 'distance', 'surface',
-       'weather', 'conditions', 'startTime', 'startNote', 'segment1',
-       'segment2', 'segment3', 'segment4', 'segment5', 'segments',
-       'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack',
-       'lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight',
-       'm_e', 'placePP', 'placeSeg1', 'lengthsSeg1', 'placeSeg2',
-       'lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4',
-       'placeSeg5', 'lengthsSeg5', 'placeSeg6', 'lengthsSeg6', 'odds',
-       'comments'])
+    #set up empty dataframe with all columns in correct order
+    dayDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','weather','conditions','startTime',
+                                  'startNote','segment1','segment2','segment3','segment4','segment5','segments','lastRaceDay','lastRaceMonth',
+                                  'lastRaceYear','lastRaceTrack','lastRaceNum','lastRacePlace','program','horse','jockey','weight','m_e',
+                                  'placePP','placeSeg1','lengthsSeg1','placeSeg2','lengthsSeg2','placeSeg3','lengthsSeg3','placeSeg4',
+                                  'lengthsSeg4','placeSeg5','lengthsSeg5','placeSeg6','lengthsSeg6','odds','comments','fracTime1','fracTime2',
+                                  'fracTime3','fracTime4','fracTime5','finalTime','runUp','wpsPool','firstPlaceWin','firstPlacePlace',
+                                  'firstPlaceShow','secondPlacePlace','secondPlaceShow','thirdPlaceShow','exactaBuyin','exactaFinish',
+                                  'exactaPayout','exactaPool','trifectaBuyin','trifectaFinish','trifectaPayout','trifectaPool','superfectaBuyin',
+                                  'superfectaFinish','superfectaPayout','superfectaPool','daily doubleBuyin','daily doubleFinish',
+                                  'daily doublePayout','daily doublePool','rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2',
+                                  'rlPlaceSeg3','rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceSeg6',
+                                  'rlLengthsSeg6','trainer','owner'])
 
     for i in range(len(newRaceInd) - 1):
 
@@ -42,11 +46,6 @@ def parseFullDay(fullChart):
 def parseRace(raceChart):
 
     cnt = 0
-
-    raceDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','segment1','segment2','segment3','segment4','segment5','segments',
-        'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack','lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight','m_e', 'placePP', 
-        'placeSeg1', 'lengthsSeg1', 'placeSeg2','lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4','placeSeg5', 'lengthsSeg5', 'placeSeg6',
-        'lengthsSeg6', 'odds', 'comments'])
 
     #loop to find indexes for different parse sections
     for line in raceChart:
