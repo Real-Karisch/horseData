@@ -10,6 +10,8 @@ from genInfoFns import parseGenInfo
 from horseInfoFns import parseHorseInfo
 from timesInfoFns import parseTimeInfo
 from betInfoFns import parseBetInfo
+from runlineInfoFns import parseRunlineInfo
+from endInfoFns import parseEndInfo
 
 
 def parseFullDay(fullChart):
@@ -68,47 +70,29 @@ def parseRace(raceChart):
             runLineInd.append(cnt)
             endInfoInd = cnt
         cnt += 1
-    """
-    print(raceChart[:genInd])
-    print('++++++++++++++++++++++++++++++++++++')
-    print(raceChart[horseInd[0]:horseInd[1]])
-    print('++++++++++++++++++++++++++++++++++++')
-    print(raceChart[timesInd[0]:timesInd[1]])
-    print('++++++++++++++++++++++++++++++++++++')
-    print(raceChart[betInd[0]:betInd[1]])
-    print('++++++++++++++++++++++++++++++++++++')
-    print(raceChart[runLineInd[0]:runLineInd[1]])
-    print('++++++++++++++++++++++++++++++++++++')
-    print(raceChart[endInfoInd:])
-    """
     
     genItems = parseGenInfo(raceChart[:genInd])
     horseItems = parseHorseInfo(raceChart[horseInd[0]:horseInd[1]])
     timesItems = parseTimeInfo(raceChart[timesInd[0]:timesInd[1]])
     betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
+    runlineItems = parseRunlineInfo(raceChart[runLineInd[0]:runLineInd[1]])
+    endItems = parseEndInfo(raceChart[endInfoInd:])
 
     genRepeated = pd.concat([genItems] * horseItems.shape[0])
     timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
+    betRepeated = pd.concat([betItems] * horseItems.shape[0])
 
     horseItems.reset_index(drop=True, inplace=True)
     genRepeated.reset_index(drop=True, inplace=True)
     timesRepeated.reset_index(drop=True, inplace=True)
-    
+    betRepeated.reset_index(drop=True, inplace=True)
+    runlineItems.reset_index(drop=True, inplace=True)  
 
-    outDF = pd.concat([genRepeated, horseItems, timesRepeated], axis = 1)
-    
-    """
-    betItems = parseBetInfo(raceChart[betInd[0]:betInd[1]])
-    runLineItems = parseRunLineInfo(raceChart[runLineInd[0]:runLineInd[1]])
-    endItems = parseEndInfo(raceChart[endInfoInd:])
-    """
+    outDF = pd.concat([genRepeated, horseItems, timesRepeated, betRepeated], axis = 1)
+    outDF = pd.merge(outDF, runlineItems, how='outer', on='program')
+    outDF = pd.merge(outDF, endItems, how='outer', on='program')
 
     return outDF
-    #genDF = pd.DataFrame(horseItems)
-    
-    #return genDF
-
-    #make df row, append to df, and return
 
 
 with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') as file:
