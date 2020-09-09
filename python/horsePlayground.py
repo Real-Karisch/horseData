@@ -100,4 +100,4 @@ with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') a
 with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') as file:
     test2 = file.readlines()
 
-#jack = parseFullDay(test2)
+jack = parseFullDay(test2)
