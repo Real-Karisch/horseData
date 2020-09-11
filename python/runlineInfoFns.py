@@ -2,12 +2,37 @@ import re
 import pandas as pd
 
 def parseRunlineInfo(runlineLines):
+    colsSearch = re.search(r'^ Pgm Horse Name (Start|[0-9/]+)', runlineLines[1])
+    if colsSearch.group(1) == 'Start':
+        firstCallStart = True
+    else:
+        firstCallStart = False
+    
     lines = runlineLines[2:]
 
     numHorses = int(len(lines) / 2)
 
     #set up empty dataframe
     runlineDF = pd.DataFrame()
+
+    priorLineBottom = True
+    missingTopLineInd = []
+    for i in range(len(runlineLines)): #loop to add spacing if top line missing (can only happen if horse dropped out of race before first point of call)
+        line = runlineLines[i]
+        if firstCallStart:
+            checkSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$', line)
+        else:
+            checkSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$', line)
+
+        if checkSearch is not None and priorLineBottom: #check to see if the current line meets the conditions for a missing top line and whether the last line was bottom
+            missingTopLineInd.append(i) #add index where true
+            priorLineBottom = True
+        else:
+            priorLineBottom = False
+
+    for i in range(len(missingTopLineInd)): #now need to loop over indices and insert empty spacer lines
+        horseLines.insert(missingTopLineInd[i], ' ')
+        missingTopLineInd = [x + 1 for x in missingTopLineInd] #need to increment remaining indices to account for new element
 
     for i in [x*2 for x in list(range(numHorses))]:
         runlineDict = {}
@@ -49,6 +74,9 @@ def parseRunlineInfo(runlineLines):
 def parseRunlineTopLine(line):
     fullSearch = re.search(r'([0-9/A-Za-z]+) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*)$', line)
 
+    if fullSearch is None:
+        print(line)
+
     out = []
     for i in range(1,7):
         out.append(fullSearch.group(i))
@@ -56,7 +84,9 @@ def parseRunlineTopLine(line):
     return out
 
 def parseRunlineBottomLine(line):
-    fullSearch = re.search(r'^ (\d?\d) [^0-9]+ ([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*)$', line)
+    fullSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ ([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*)$', line)
+    if fullSearch is None:
+        print(line)
 
     out = []
 

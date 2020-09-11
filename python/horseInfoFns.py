@@ -78,8 +78,10 @@ def parseHorseTopLine(line):
     return out
 
 def parseHorseBottomLine(line):
-    fullSearch = re.search(r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d) ([^0-9]+) (\d?\d?\d)[»½]* ([ABCLM]+|[ABCLM]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)\*? (.*)$', line)
-
+    
+    fullSearch = re.search(r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d[ABC]?) ([^0-9]+) (\d?\d?\d)[»½¶]* ([ABCLM]+|[ABCLM]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)\*? (.*)$', line)
+    if fullSearch is None:
+        print(line)
     out = []
     dateSearch = re.search(r'(\d?\d)([A-Z][a-z]{2})(\d\d) ([A-Z]{2,3})', fullSearch.group(1))
     if dateSearch is not None:
