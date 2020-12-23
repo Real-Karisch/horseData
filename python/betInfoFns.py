@@ -1,7 +1,16 @@
 import re
 import pandas as pd
 
+"""
+This file contains functions that are called in order to parse the lines of the chart relating to betting info.
+"""
+
 def parseBetInfo(betLines):
+    """
+    Driver function to manage/delegate parsing of bet lines and generating dictionaries with info.
+    Input: betLines, a list of strings, each string containing one line of the race chart
+    Output: a dictionary containing 
+    """
     betDict = {}
 
     ind = 0
