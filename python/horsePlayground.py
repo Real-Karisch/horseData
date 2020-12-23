@@ -13,6 +13,35 @@ from betInfoFns import parseBetInfo
 from runlineInfoFns import parseRunlineInfo
 from endInfoFns import parseEndInfo
 
+def bulkParse(dirToFiles):
+    if dirToFiles[-1] != '/':
+        dirToFiles += '/'
+    files = os.listdir(dirToFiles)
+
+    fullDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','weather','conditions','startTime',
+                                  'startNote','segment1','segment2','segment3','segment4','segment5','segments','lastRaceDay','lastRaceMonth',
+                                  'lastRaceYear','lastRaceTrack','lastRaceNum','lastRacePlace','program','horse','jockey','weight','m_e',
+                                  'placePP','placeSeg1','lengthsSeg1','placeSeg2','lengthsSeg2','placeSeg3','lengthsSeg3','placeSeg4',
+                                  'lengthsSeg4','placeSeg5','lengthsSeg5','placeSeg6','lengthsSeg6','odds','comments','fracTime1','fracTime2',
+                                  'fracTime3','fracTime4','fracTime5','finalTime','runUp','wpsPool','firstPlaceWin','firstPlacePlace',
+                                  'firstPlaceShow','secondPlacePlace','secondPlaceShow','thirdPlaceShow','exactaBuyin','exactaFinish',
+                                  'exactaPayout','exactaPool','trifectaBuyin','trifectaFinish','trifectaPayout','trifectaPool','superfectaBuyin',
+                                  'superfectaFinish','superfectaPayout','superfectaPool','daily doubleBuyin','daily doubleFinish',
+                                  'daily doublePayout','daily doublePool','rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2',
+                                  'rlPlaceSeg3','rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceSeg6',
+                                  'rlLengthsSeg6','trainer','owner'])
+    
+    cnt = 0
+    for file in files:
+        with open(dirToFiles + file) as active:
+            chart = active.readlines()
+        dayDF = parseFullDay(chart)
+
+        fullDF = pd.concat([fullDF, dayDF])
+        cnt += 1
+        print(cnt)
+    
+    return fullDF
 
 def parseFullDay(fullChart):
     newRaceInd = [-1] #first index will be 0 after conversion (controls for out of index error later)
@@ -21,15 +50,19 @@ def parseFullDay(fullChart):
         if re.search(newRaceTest, fullChart[i]) is not None: #check for the expression that signifies end of race
             newRaceInd.append(i)
 
-    dayDF = pd.DataFrame(columns=['trackName', 'month', 'day', 'year', 'raceNum', 'distance', 'surface',
-       'weather', 'conditions', 'startTime', 'startNote', 'segment1',
-       'segment2', 'segment3', 'segment4', 'segment5', 'segments',
-       'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack',
-       'lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight',
-       'm_e', 'placePP', 'placeSeg1', 'lengthsSeg1', 'placeSeg2',
-       'lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4',
-       'placeSeg5', 'lengthsSeg5', 'placeSeg6', 'lengthsSeg6', 'odds',
-       'comments'])
+    #set up empty dataframe with all columns in correct order
+    dayDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','weather','conditions','startTime',
+                                  'startNote','segment1','segment2','segment3','segment4','segment5','segments','lastRaceDay','lastRaceMonth',
+                                  'lastRaceYear','lastRaceTrack','lastRaceNum','lastRacePlace','program','horse','jockey','weight','m_e',
+                                  'placePP','placeSeg1','lengthsSeg1','placeSeg2','lengthsSeg2','placeSeg3','lengthsSeg3','placeSeg4',
+                                  'lengthsSeg4','placeSeg5','lengthsSeg5','placeSeg6','lengthsSeg6','odds','comments','fracTime1','fracTime2',
+                                  'fracTime3','fracTime4','fracTime5','finalTime','runUp','wpsPool','firstPlaceWin','firstPlacePlace',
+                                  'firstPlaceShow','secondPlacePlace','secondPlaceShow','thirdPlaceShow','exactaBuyin','exactaFinish',
+                                  'exactaPayout','exactaPool','trifectaBuyin','trifectaFinish','trifectaPayout','trifectaPool','superfectaBuyin',
+                                  'superfectaFinish','superfectaPayout','superfectaPool','daily doubleBuyin','daily doubleFinish',
+                                  'daily doublePayout','daily doublePool','rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2',
+                                  'rlPlaceSeg3','rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceSeg6',
+                                  'rlLengthsSeg6','trainer','owner'])
 
     for i in range(len(newRaceInd) - 1):
 
@@ -43,10 +76,7 @@ def parseRace(raceChart):
 
     cnt = 0
 
-    raceDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','segment1','segment2','segment3','segment4','segment5','segments',
-        'lastRaceDay', 'lastRaceMonth', 'lastRaceYear', 'lastRaceTrack','lastRaceNum', 'lastRacePlace', 'program', 'horse', 'jockey', 'weight','m_e', 'placePP', 
-        'placeSeg1', 'lengthsSeg1', 'placeSeg2','lengthsSeg2', 'placeSeg3', 'lengthsSeg3', 'placeSeg4', 'lengthsSeg4','placeSeg5', 'lengthsSeg5', 'placeSeg6',
-        'lengthsSeg6', 'odds', 'comments'])
+    raceDF = pd.DataFrame()
 
     #loop to find indexes for different parse sections
     for line in raceChart:
@@ -99,5 +129,9 @@ with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.112.txt') a
     test1 = file.readlines()
 with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-11T010651.148.txt') as file:
     test2 = file.readlines()
+with open('./../charts/chartsTxt/eqbPDFChartPlus - 2020-08-14T221922.451.txt') as file:
+    test3 = file.readlines()
 
-jack = parseFullDay(test2)
+#jack = parseFullDay(test3)
+#directory = '/home/karisch/programming/projects/horseData/charts/chartsTest'
+#jack = bulkParse(directory)

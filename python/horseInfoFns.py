@@ -5,7 +5,7 @@ def parseHorseInfo(horseLines):
     numHorses = int(len(horseLines) / 2)
 
     #set up empty df
-    horseDF = pd.DataFrame(columns = ['lastRaceDay','lastRaceMonth','lastRaceYear','lastRaceTrack','lastRaceNum','lastRacePlace','program','horse', 'jockey','weight','m_e','placePP','placeSeg1','lengthsSeg1','placeSeg2','lengthsSeg2','placeSeg3','lengthsSeg3','placeSeg4','lengthsSeg4','placeSeg5','lengthsSeg5','placeSeg6','lengthsSeg6','odds','comments'])
+    horseDF = pd.DataFrame()
 
     horseDict = {}
 
@@ -78,8 +78,10 @@ def parseHorseTopLine(line):
     return out
 
 def parseHorseBottomLine(line):
-    fullSearch = re.search(r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d) ([^0-9]+) (\d?\d?\d)[»½]* ([A-Za-z -]*\d?) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)\*? (.*)$', line)
-
+    
+    fullSearch = re.search(r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d[ABC]?) ([^0-9]+) (\d?\d?\d)[»½¶]* ([ABCLM]+|[ABCLM]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)\*? (.*)$', line)
+    if fullSearch is None:
+        print(line)
     out = []
     dateSearch = re.search(r'(\d?\d)([A-Z][a-z]{2})(\d\d) ([A-Z]{2,3})', fullSearch.group(1))
     if dateSearch is not None:
@@ -103,17 +105,31 @@ def placeLengths(horseDF, topItemsList):
     placeSegNames = ['placeSeg1','placeSeg2','placeSeg3','placeSeg4','placeSeg5','placeSeg6']
     lengthsSegNames = ['lengthsSeg1','lengthsSeg2','lengthsSeg3','lengthsSeg4','lengthsSeg5','lengthsSeg6']
 
+    topItemsFull = False
+    for items in topItemsList:
+        if items[-1] != '':
+            topItemsFull = True
+            break
+
+    #loop over the points of call of each race, looking at each horse in turn to determine if any have dropped out.
+    #this is to ensure that the total number of horses in the race is known at each point of call.
+    #this allows accurate placement of lengths for horses that were in last place at some point in the race.
     numHorses = []
     for seg in placeSegNames:
         tempNumHorses = horseDF.shape[0]
         for i in range(horseDF.shape[0]):
-            if horseDF[seg][i] == '---':
-                tempNumHorses -= 1
+            if horseDF[seg][i] == '---': #if this horse was no longer in the race at this point of call
+                tempNumHorses -= 1 #reduce horses in the race by one
         numHorses.append(str(tempNumHorses))
-        
+    
+    #loop over each point of call for each horse, inserting the appropriate lengths into the dataframe
     for horseInd in range(horseDF.shape[0]):
+        if topItemsFull: #if all the points of call have lengths associated (i.e. one of them is not "start")
+            startSeg = 0 #start placing lengths at the first point of call
+        else:
+            startSeg = 1 #otherwise, start at the second point of call (the first non-start point of call)
         lengthsIndex = 0
-        for segInd in range(len(placeSegNames)):
+        for segInd in range(startSeg, len(placeSegNames)):
             if horseDF[placeSegNames[segInd]][horseInd] == numHorses[segInd]: #if horse was in last place at this point
                 horseDF.loc[horseInd, lengthsSegNames[segInd]] = '' #lengths will be left blank
             else: 

@@ -3,7 +3,7 @@ import pandas as pd
 
 def parseTimeInfo(timeLines):
 
-    timeDF = pd.DataFrame(columns = ['fracTime1', 'fracTime2', 'fracTime3', 'fracTime4', 'fracTime5', 'finalTime', 'runUp'])
+    timeDF = pd.DataFrame()
     timeDict = {}
 
     runUp = '0'
