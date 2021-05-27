@@ -1,0 +1,180 @@
+---
+title: "Process raw data"
+author: "Ford Holland (jfh2150)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(pdftools)
+library(lubridate)
+```
+
+Read in the full pdf.
+
+```{r}
+racing_form <- pdf_data(here::here("data/raw/eqbfullpp_example.pdf"))
+```
+
+Function to parse past performance data into tables.
+
+```{r}
+parse_pp <- 
+  function(pdf, page_num) {
+    # save specified page
+    page <-  
+      pdf[[page_num]] %>% 
+      mutate(
+        x = round(x/3),        
+        y = round(y/3)
+      ) %>% 
+      arrange(y, x)
+    
+    # vector of color names to use to filter out all color labels
+    colors <- colors() %>% str_to_title()
+    
+    # parse the horse ID numbers and past performance dates
+    horse_ids_and_dates <- 
+      page %>% 
+      filter(x <= 10) %>% 
+      filter(!text %in% c("A", "Workout(s):", "Scratch(es):", "Trainer", "AQU-12/13/2017-1", colors)) %>% 
+      arrange(x, y) %>% 
+      group_by(y) %>% 
+      # add column numbers for table data 
+      # mutate(colnum = row_number()) %>%        
+      ungroup() %>% 
+      arrange(y) %>% 
+      mutate(
+        horse_id = 
+          case_when(
+            x == 10 ~ text,
+            TRUE ~ NA_character_
+          )
+      ) %>% 
+      fill(horse_id, .direction = "down") %>% 
+      filter(x != 10) %>% 
+      select(y, horse_id, text) %>% 
+      drop_na(horse_id)
+    
+    pp_table <- 
+      page %>%
+      filter((x >= 75 & x <= 130)) %>% 
+      arrange(x, y) %>% 
+      group_by(y) %>% 
+      # add column numbers for table data 
+      mutate(colnum = row_number()) %>%        
+      ungroup() %>% 
+      select(text, colnum, y) %>% 
+      # pivot into table format
+      pivot_wider(names_from = colnum, values_from = text) %>%
+      # clean names
+      janitor::clean_names() %>% 
+      arrange(y) %>% 
+      group_by(y) %>%
+      ungroup()
+    
+    # join IDs and dates to performance data 
+    race <- inner_join(horse_ids_and_dates, pp_table, by = "y")
+    
+    df <- race
+    
+    # shift rows that have extra rows because of jockey initials
+    cols <- 14:16
+    
+    for (i in cols) {
+      for(j in which(!is.na(df$x14))) {
+        df[j, i] <- df[j, i+1]
+      }
+    }
+    
+    # parse out all numbers from string
+    df1 <- 
+      df %>% 
+      mutate(
+        x4 = x4 %>% str_extract_all("\\(?[0-9,.]+\\)?")
+      )
+    
+    # columns that will be shifted right
+    cols <- (ncol(df1) - 1):9
+    
+    # rows with multiple values in the same column
+    rows <- which(lengths(df1$x4) > 1)
+    
+    # for rows with 2 numbers, shift following columns to the right by 1
+    for (i in cols) {
+      for(j in rows) {
+        df1[j, i] <- df1[j, i - 1] %>% as.character()
+      }
+    }
+    
+    df2 <- df1
+    
+    for (i in 1:nrow(df2)) {
+      if (!is.na(df2$x4[i][[1]][2])) {
+        df2$x5[i] = df2$x4[i][[1]][2]
+        df2$x4[i] = df2$x4[i][[1]][1]
+      }
+    }
+    
+    # drop unnecessary columns
+    df3 <- df2 %>% select(-c(x10, x12, x14))
+    
+    # for rows where jockey name not read, shift columns to the right by 1
+    cols <- (ncol(df3)):13
+    rows <- which(is.na(df3$x13))
+    
+    df4 <- df3
+    
+    for (i in cols) {
+      print(str_glue("COLUMN {i} --------"))
+      for(j in rows) {
+        print(str_glue("df4[j, i] = {df4[j, i]} -- df4[j, i-1] = {df4[j, i-1]}"))
+        df4[j, i] <- df4[j, i - 1]
+      }
+    }
+    
+    df4 <- df4 %>% mutate(x4 = as.character(x4))
+    
+    df_final <- 
+      df4 %>% 
+      select(-y) %>% 
+      map_at(c("x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x11", "x13"), parse_number) %>% 
+      as.data.frame() %>% 
+      mutate(date = dmy(text))
+    
+    df_final$text %>% as.Date("%d%b%y")
+    df_final$text %>% dmy()
+    
+    df_final <- 
+      df_final %>% 
+      select(horse_id, date, everything(), -text) %>% 
+      rename(finishing_position = x8) %>% 
+      drop_na(date)
+    
+    df_final
+  }
+```
+
+Parse data for race 1.
+
+```{r}
+# parse first page
+page3 <- parse_pp(racing_form, page_num = 3)
+
+# parse second page
+page4 <- parse_pp(racing_form, page_num = 4)
+
+# bind datasets together
+df_race1 <- bind_rows(page3, page4)
+```
+
+Save csv.
+
+```{r}
+write_csv(df_race1, file = here::here("data/clean/race1_data.csv"))
+```
+
+
+
