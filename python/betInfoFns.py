@@ -39,7 +39,6 @@ def parseBetInfo(betLines):
 
     additionalLines = betLines[(betStartInd + 4):] + [firstPlaceItems[-1], secondPlaceItems[-1], thirdPlaceItems[-1]]
 
-    index = 0
     for line in additionalLines:
         if line is None:
             line = ''
@@ -56,9 +55,7 @@ def parseBetInfo(betLines):
             betDict[keyword + 'Payout'] = activeAdditional[3]
             betDict[keyword + 'Pool'] = activeAdditional[4]
 
-    betDF = pd.DataFrame(betDict, index = [0])
-
-    return betDF
+    return betDict
 
 def parseWPS(line):
     fullSearch = re.search(r'Total WPS Pool: \$([0-9,]*)', line)
