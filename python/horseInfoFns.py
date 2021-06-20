@@ -1,19 +1,19 @@
 import re
 import pandas as pd
 
+from regexPatterns import *
+
 def parseHorseInfo(horseLines):
     numHorses = int(len(horseLines) / 2)
 
-    #set up empty df
-    horseDF = pd.DataFrame()
-
     horseDict = {}
+    horseDicts = []
 
     priorLineBottom = True
     missingTopLineInd = []
     for i in range(len(horseLines)): #loop to add spacing if top line missing (can only happen if horse has never been raced AND was in last place the whole race)
         line = horseLines[i]
-        if re.search('^ (\d?\d[A-Z][a-z]{2}\d\d|---)', line) is not None and priorLineBottom: #check to see if the current line is bottom and the last line was also bottom
+        if re.search(horseInfoBottomLineCheckPattern, line) is not None and priorLineBottom: #check to see if the current line is bottom and the last line was also bottom
             missingTopLineInd.append(i) #add index where true
             priorLineBottom = True
         else:
@@ -58,18 +58,14 @@ def parseHorseInfo(horseLines):
             horseDict['lastRacePlace'] = topItems[1]
             topItemsList.append(topItems[2:])
 
-        activeDF = pd.DataFrame(horseDict, index = [0])
-        
-        horseDF = pd.concat([horseDF, activeDF])
-
-    horseDF.reset_index(drop = True, inplace=True)
+            horseDicts.append(dict(horseDict))
     
-    horseDF = placeLengths(horseDF, topItemsList)
+    horseDicts = placeLengths(horseDicts, topItemsList)
 
-    return horseDF
+    return horseDicts
 
 def parseHorseTopLine(line):
-    fullSearch = re.search(r'^ ([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*)', line)
+    fullSearch = re.search(horseInfoTopLineSearchPattern, line)
 
     out = []
     for i in range(1,9):
@@ -79,11 +75,13 @@ def parseHorseTopLine(line):
 
 def parseHorseBottomLine(line):
     
-    fullSearch = re.search(r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d[ABC]?) ([^0-9]+) (\d?\d?\d)[»½¶]* ([ABCLM]+|[ABCLM]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)\*? (.*)$', line)
+    fullSearch = re.search(horseInfoBottomLineSearchPattern, line)
     if fullSearch is None:
-        print(line)
+        print('parseHorseBottomLine error on line: ' + line)
+        out = ['ERROR'] * 18
+        return out
     out = []
-    dateSearch = re.search(r'(\d?\d)([A-Z][a-z]{2})(\d\d) ([A-Z]{2,3})', fullSearch.group(1))
+    dateSearch = re.search(horseInfoDateSearchPattern, fullSearch.group(1))
     if dateSearch is not None:
         out[:4] = [dateSearch.group(1), dateSearch.group(2), dateSearch.group(3), dateSearch.group(4)]
     else:
@@ -92,7 +90,9 @@ def parseHorseBottomLine(line):
     out.append(fullSearch.group(2))
 
     horseAndJockey = fullSearch.group(3)
-    hjSearch = re.search(r'(.*) \(([-A-Za-z,. ]+)\)', horseAndJockey)
+    hjSearch = re.search(horseJockeySearchPattern, horseAndJockey)
+    if hjSearch is None:
+        print(horseAndJockey)
     out.append(hjSearch.group(1))
     out.append(hjSearch.group(2))
 
@@ -101,7 +101,7 @@ def parseHorseBottomLine(line):
 
     return out
 
-def placeLengths(horseDF, topItemsList):
+def placeLengths(horseDicts, topItemsList):
     placeSegNames = ['placeSeg1','placeSeg2','placeSeg3','placeSeg4','placeSeg5','placeSeg6']
     lengthsSegNames = ['lengthsSeg1','lengthsSeg2','lengthsSeg3','lengthsSeg4','lengthsSeg5','lengthsSeg6']
 
@@ -116,24 +116,26 @@ def placeLengths(horseDF, topItemsList):
     #this allows accurate placement of lengths for horses that were in last place at some point in the race.
     numHorses = []
     for seg in placeSegNames:
-        tempNumHorses = horseDF.shape[0]
-        for i in range(horseDF.shape[0]):
-            if horseDF[seg][i] == '---': #if this horse was no longer in the race at this point of call
+        tempNumHorses = len(horseDicts)
+        for horseDict in horseDicts:
+            if horseDict[seg] == '---': #if this horse was no longer in the race at this point of call
                 tempNumHorses -= 1 #reduce horses in the race by one
         numHorses.append(str(tempNumHorses))
     
+    ind = 0
     #loop over each point of call for each horse, inserting the appropriate lengths into the dataframe
-    for horseInd in range(horseDF.shape[0]):
+    for horseDict in horseDicts:
         if topItemsFull: #if all the points of call have lengths associated (i.e. one of them is not "start")
             startSeg = 0 #start placing lengths at the first point of call
         else:
             startSeg = 1 #otherwise, start at the second point of call (the first non-start point of call)
         lengthsIndex = 0
         for segInd in range(startSeg, len(placeSegNames)):
-            if horseDF[placeSegNames[segInd]][horseInd] == numHorses[segInd]: #if horse was in last place at this point
-                horseDF.loc[horseInd, lengthsSegNames[segInd]] = '' #lengths will be left blank
+            if horseDict[placeSegNames[segInd]] == numHorses[segInd]: #if horse was in last place at this point
+                horseDict[lengthsSegNames[segInd]] = '' #lengths will be left blank
             else: 
-                horseDF.loc[horseInd, lengthsSegNames[segInd]] = topItemsList[horseInd][lengthsIndex] #if not, fill in the lengths of the next point
+                horseDict[lengthsSegNames[segInd]] = topItemsList[ind][lengthsIndex] #if not, fill in the lengths of the next point
                 lengthsIndex += 1 #then go to next index in the lengths list
+        ind += 1
 
-    return horseDF
+    return horseDicts

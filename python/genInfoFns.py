@@ -1,6 +1,8 @@
 import re
 import pandas as pd
 
+from regexPatterns import *
+
 def parseGenInfo(genLines):
 
     dfDict = {}
@@ -8,13 +10,13 @@ def parseGenInfo(genLines):
     dfDict['trackName'], dfDict['month'], dfDict['day'], dfDict['year'], dfDict['raceNum'] = parseLine1(genLines[0])
     
     for line in genLines[0:]:
-        if re.search('Track Record:', line) is not None:
+        if re.search(distanceSurfaceLinePattern, line) is not None:
             dfDict['distance'], dfDict['surface'] = parseDistanceSurface(line)
-        elif re.search('Weather: [A-Za-z]+ Track:', line) is not None:
+        elif re.search(weatherConditionsLinePattern, line) is not None:
             dfDict['weather'], dfDict['conditions'] = parseWeatherConditions(line)
-        elif re.search('Off at: [0-9:]+ Start:', line) is not None:
+        elif re.search(startNotesLinePattern, line) is not None:
             dfDict['startTime'], dfDict['startNote'] = parseStart(line)
-        elif re.search('Last Raced Pgm', line) is not None:
+        elif re.search(segmentsLinePattern, line) is not None:
             dfDict['segment1'], dfDict['segment2'], dfDict['segment3'], dfDict['segment4'], dfDict['segment5'] = parseSegments(line)
 
     if dfDict['segment3'] == '':
@@ -26,14 +28,16 @@ def parseGenInfo(genLines):
     else:
         dfDict['segments'] = 5
 
-    genInfoItems = pd.DataFrame(dfDict, index = [0])
-
-    return genInfoItems
-
+    return dfDict
 
 def parseLine1(line):
+    simpleLine = re.sub(r'[^-A-Za-z]', '', line)
 
-    fullSearch = re.search(r' *([^-]+) - ([^-]+) - (.*)', line)
+    if re.search(r'(RMTC|CALLAWAYGARDEN)', simpleLine) is not None: #check if track is lethbridge
+        fullSearch = re.search(genInfoLine1LethbridgePattern, line)
+    else:
+        fullSearch = re.search(genInfoLine1TrackPattern, line)
+
     trackNameRaw = fullSearch.group(1)
     dateRaw = fullSearch.group(2)
     raceNumRaw = fullSearch.group(3)
@@ -43,27 +47,31 @@ def parseLine1(line):
     trackName = trackLongToShort[trackNameFull]
 
     #date
-    dateSearch = re.search(r'([A-Za-z]*) (\d?\d), (\d\d\d\d)', dateRaw)
+    dateSearch = re.search(genInfoLine1DatePattern, dateRaw)
     monthRaw = dateSearch.group(1)
     month = monthNameToNumber[monthRaw]
     day = dateSearch.group(2)
     year = dateSearch.group(3)
 
     #race number
-    raceNum = re.search('\d?\d', raceNumRaw).group(0)
+    raceNum = re.search(genInfoLine1RaceNumPattern, raceNumRaw).group(0)
 
     out = [trackName, int(month), int(day), int(year), int(raceNum)]
 
     return out
 
 def parseLine2(line):
-    breedRaw = re.search(r'- (.*)$', line).group(1)
+    breedRaw = re.search(genInfoLine2BreedPattern, line).group(1)
     breed = re.sub('[^A-Za-z]', '', breedRaw)
     return breed
 
 def parseDistanceSurface(line):
-    fullSearch = re.search(r'([ A-Za-z]+)(?=Track)', line).group(0)
-    specSearch = re.match(r' (.*) (?=On The)On The ([A-Z][a-z ]*) ', fullSearch)
+    fullSearch = re.search(distanceSurfaceFullSearchPattern, line).group(0)
+    specSearch = re.match(distanceSurfaceSpecSearchPattern, fullSearch)
+
+    if specSearch is None:
+        print('Match error in parseDistanceSurface on line: ' + fullSearch)
+
     distanceRaw, surface = [specSearch.group(1), specSearch.group(2)]
 
     out = [distanceRaw, surface]
@@ -71,7 +79,12 @@ def parseDistanceSurface(line):
     return out
 
 def parseWeatherConditions(line):
-    fullSearch = re.search(r'Weather: ([A-Z][a-z]*) Track: ([A-Z][a-z]*)', line)
+    fullSearch = re.search(weatherConditionsSearchPattern, line)
+
+    if fullSearch is None:
+        print('Match error in parseWeatherConditions on line: ' + line)
+        return ['ERROR'] * 2
+
     weather = fullSearch.group(1)
     conditions = fullSearch.group(2)
 
@@ -80,7 +93,12 @@ def parseWeatherConditions(line):
     return out
 
 def parseStart(line):
-    fullSearch = re.search(r'Off at: (\d?\d:\d\d) Start: ([A-Z0-9][a-z0-9 ]*)', line)
+    fullSearch = re.search(startNotesSearchPattern, line)
+
+    if fullSearch is None:
+        print('Match error in parseStart on line: ' + line)
+        return ['ERROR'] * 2
+
     startTime = fullSearch.group(1)
     startNote = fullSearch.group(2)
 
@@ -89,8 +107,7 @@ def parseStart(line):
     return out
 
 def parseSegments(line):
-
-    fullSearch = re.search(r'PP ([A-Za-z0-9/]+) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?([A-Za-z0-9/]*) ?Fin', line)
+    fullSearch = re.search(segmentsSearchPattern, line)
     segment1 = fullSearch.group(1)
     segment2 = fullSearch.group(2)
     segment3 = fullSearch.group(3)

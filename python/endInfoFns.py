@@ -1,52 +1,54 @@
 import re
 import pandas as pd
 
+from regexPatterns import *
+
 def parseEndInfo(endLines):
 
     cnt = 0
     for line in endLines:
-        if re.match(r'^ Trainers:', line) is not None:
+        if re.match(trainerLinePattern, line) is not None:
             trainerInd = [cnt]
-        elif re.match(r'^ Owners:', line) is not None:
+        elif re.match(ownerLinePattern, line) is not None:
             trainerInd.append(cnt)
             ownerInd = [cnt]
-        elif re.match(r'^ Footnotes$', line) is not None:
+        elif re.match(footnoteLinePattern, line) is not None:
             ownerInd.append(cnt)
         cnt += 1
     
     trainerLine = ''.join([line[:-1] for line in endLines[trainerInd[0]: trainerInd[1]]]) + ';'
     ownerLine = ''.join([line[:-1] for line in endLines[ownerInd[0]: ownerInd[1]]])
 
-    trainersDF = parseTrainerLine(trainerLine)
-    ownersDF = parseOwnerLine(ownerLine)
+    trainersDict = parseTrainerLine(trainerLine)
+    ownersDict = parseOwnerLine(ownerLine)
 
-    fullDF = pd.merge(trainersDF, ownersDF, how = 'outer', on='program')
-
-    return fullDF
+    return [trainersDict, ownersDict]
 
 
 def parseTrainerLine(line):
-    endDF = pd.DataFrame(columns=['program','trainer'])
+    endDict = {'program': [], 'trainer': []}
 
-    fullSearch = re.search(r'( \d?\d - [^;]+;)+', line)
+    fullSearch = re.search(trainerFullSearchPattern, line)
     split = fullSearch.group(0).split(';')[:-1]
 
     for item in split:
-        shortSearch = re.search(r'(\d?\d) - (.+)$', item)
+        shortSearch = re.search(trainerShortSearchPattern, item)
 
-        endDF = pd.concat([endDF, (pd.DataFrame(data=[[shortSearch.group(1),shortSearch.group(2)]],columns=['program','trainer']))])
+        endDict['program'].append(shortSearch.group(1))
+        endDict['trainer'].append(shortSearch.group(2))
 
-    return endDF
+    return endDict
 
 def parseOwnerLine(line):
-    endDF = pd.DataFrame(columns=['program','owner'])
+    endDict = {'program': [], 'owner': []}
 
-    fullSearch = re.search(r'( \d?\d - ?[^;]+;)+', line)
+    fullSearch = re.search(ownerFullSearchPattern, line)
     split = fullSearch.group(0).split(';')[:-1]
 
     for item in split:
-        shortSearch = re.search(r'^ (\d?\d) - ?(.+)$', item)
+        shortSearch = re.search(ownerShortSearchPattern, item)
 
-        endDF = pd.concat([endDF, (pd.DataFrame(data=[[shortSearch.group(1),shortSearch.group(2)]],columns=['program','owner']))])
+        endDict['program'].append(shortSearch.group(1))
+        endDict['owner'].append(shortSearch.group(2))
 
-    return endDF
+    return endDict

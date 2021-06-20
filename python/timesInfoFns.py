@@ -1,17 +1,17 @@
 import re
 import pandas as pd
 
-def parseTimeInfo(timeLines):
+from regexPatterns import *
 
-    timeDF = pd.DataFrame()
+def parseTimeInfo(timeLines):
     timeDict = {}
 
     runUp = '0'
 
     for line in timeLines:
-        if re.search('Fractional Times:|Final Time:', line) is not None:
+        if re.search(fractionalTimesLinePattern, line) is not None:
             fractionalTimes = parseFractionalTimes(line)
-        elif re.search('Run-Up:', line) is not None:
+        elif re.search(runupLinePattern, line) is not None:
             runUp = parseRunUp(line)
 
     timeDict['fracTime1'] = fractionalTimes[0]
@@ -22,12 +22,16 @@ def parseTimeInfo(timeLines):
     timeDict['finalTime'] = fractionalTimes[5]
     timeDict['runUp'] = runUp
 
-    return pd.DataFrame(timeDict, index=[0])
+    return timeDict
 
 
 def parseFractionalTimes(line):
 
-    fullSearch = re.search(r'(Fractional Times: ([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*))? Final Time: ([0-9.:]*)', line)
+    fullSearch = re.search(fractionalTimesSearchPattern, line)
+
+    if fullSearch is None:
+        print('Match error in parseFractionalTimes on line: ' + line)
+        return ['ERROR'] * 7
 
     out = []
     for i in range(2,8):
@@ -39,7 +43,7 @@ def parseFractionalTimes(line):
     return out
 
 def parseRunUp(line):
-    fullSearch = re.search(r'Run-Up: ([0-9.]*)', line)
+    fullSearch = re.search(runupSearchPattern, line)
     runUp = fullSearch.group(1)
 
     return runUp

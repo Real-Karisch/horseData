@@ -1,8 +1,10 @@
 import re
 import pandas as pd
 
+from regexPatterns import *
+
 def parseRunlineInfo(runlineLines):
-    colsSearch = re.search(r'^ Pgm Horse Name (Start|[0-9/]+)', runlineLines[1])
+    colsSearch = re.search(pointOfCallLinePattern, runlineLines[1])
     if colsSearch.group(1) == 'Start':
         firstCallStart = True
     else:
@@ -13,16 +15,16 @@ def parseRunlineInfo(runlineLines):
     numHorses = int(len(lines) / 2)
 
     #set up empty dataframe
-    runlineDF = pd.DataFrame()
+    runlineDicts = []
 
     priorLineBottom = True
     missingTopLineInd = []
     for i in range(len(runlineLines)): #loop to add spacing if top line missing (can only happen if horse dropped out of race before first point of call)
         line = runlineLines[i]
         if firstCallStart:
-            checkSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$', line)
+            checkSearch = re.search(firstCallStartRLSearchPattern, line)
         else:
-            checkSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$', line)
+            checkSearch = re.search(firstCallNonStartRLSearchPattern, line)
 
         if checkSearch is not None and priorLineBottom: #check to see if the current line meets the conditions for a missing top line and whether the last line was bottom
             missingTopLineInd.append(i) #add index where true
@@ -31,7 +33,7 @@ def parseRunlineInfo(runlineLines):
             priorLineBottom = False
 
     for i in range(len(missingTopLineInd)): #now need to loop over indices and insert empty spacer lines
-        horseLines.insert(missingTopLineInd[i], ' ')
+        runlineLines.insert(missingTopLineInd[i], ' ')
         missingTopLineInd = [x + 1 for x in missingTopLineInd] #need to increment remaining indices to account for new element
 
     for i in [x*2 for x in list(range(numHorses))]:
@@ -64,18 +66,17 @@ def parseRunlineInfo(runlineLines):
         runlineDict['rlPlaceSeg5'] = bottomItems[5]
         runlineDict['rlPlaceSeg6'] = bottomItems[6]
 
-        activeDF = pd.DataFrame(runlineDict, index = [0])
+        runlineDicts.append(dict(runlineDict))
 
-        runlineDF = pd.concat([runlineDF, activeDF])
-
-    return runlineDF
+    return runlineDicts
 
 
 def parseRunlineTopLine(line):
-    fullSearch = re.search(r'([0-9/A-Za-z]+) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*)$', line)
+    fullSearch = re.search(rlTopLineSearchPattern, line)
 
     if fullSearch is None:
-        print(line)
+        print('Match error in parseRunlineTopLine on line: ' + line)
+        return ['ERROR'] * 6
 
     out = []
     for i in range(1,7):
@@ -84,9 +85,10 @@ def parseRunlineTopLine(line):
     return out
 
 def parseRunlineBottomLine(line):
-    fullSearch = re.search(r'^ (\d?\d[ABC]?) [^0-9]+ ([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*)$', line)
+    fullSearch = re.search(rlBottomLineSearchPattern, line)
     if fullSearch is None:
-        print(line)
+        print('Match error in parseRunlineBottomLine on line: ' + line)
+        return ['ERROR'] * 7
 
     out = []
 
