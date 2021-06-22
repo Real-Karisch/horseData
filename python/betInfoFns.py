@@ -34,18 +34,18 @@ def parseBetInfo(betLines):
     wpsPool = parseWPS(betLines[wpsInd])
     betDict['wpsPool'] = wpsPool
 
-    firstPlaceItems = parseFirstPlace([betLines[betStartInd], linesCleaned[0]])
-    secondPlaceItems = parseSecondPlace([betLines[betStartInd], linesCleaned[1]])
-        
+    firstPlaceItems = parseBetLine(linesCleaned[0])
+    secondPlaceItems = parseBetLine(linesCleaned[1])
 
     betDict['firstPlaceWin'] = firstPlaceItems[0]
     betDict['firstPlacePlace'] = firstPlaceItems[1]
     betDict['firstPlaceShow'] = firstPlaceItems[2]
     betDict['secondPlacePlace'] = secondPlaceItems[0]
     betDict['secondPlaceShow'] = secondPlaceItems[1]
-
+    
     if len(linesCleaned) > 2:
-        thirdPlaceItems = parseThirdPlace([betLines[betStartInd], linesCleaned[2]])
+        thirdPlaceItems = parseBetLine(linesCleaned[2])
+
         betDict['thirdPlaceShow'] = thirdPlaceItems[0]
 
         additionalLines = betLines[(betStartInd + 4):] + [firstPlaceItems[-1], secondPlaceItems[-1], thirdPlaceItems[-1]]
@@ -61,10 +61,15 @@ def parseBetInfo(betLines):
 
                 activeAdditional = parseAdditionalBetLines(line)
 
-                betDict[keyword + 'Buyin'] = re.search(buyinPattern, activeAdditional[0]).group(1) if activeAdditional[0] != 'ERROR' else 'ERROR'
+                if activeAdditional[0] != 'ERROR' and re.search(buyinPattern, activeAdditional[0]) is None:
+                    print('Additional bet line parse error on line: ' + line)
+                    betDict[keyword + 'Buyin'] = 'ERROR'
+                else:
+                    betDict[keyword + 'Buyin'] = re.search(buyinPattern, activeAdditional[0]).group(1) if activeAdditional[0] != 'ERROR' else 'ERROR'
+
                 betDict[keyword + 'Finish'] = activeAdditional[1]
                 betDict[keyword + 'Payout'] = activeAdditional[3]
-                betDict[keyword + 'Pool'] = activeAdditional[4]    
+                betDict[keyword + 'Pool'] = activeAdditional[4]
 
     return betDict
 
@@ -73,18 +78,56 @@ def parseWPS(line):
 
     return fullSearch.group(1)
 
+def parseBetLine(line):
+    fullSearch = re.search(betLineThreeEntryPattern, line)
+    if fullSearch is None:
+        fullSearch = re.search(betLineTwoEntryPattern, line)
+        if fullSearch is None:
+            fullSearch = re.search(betLineOneEntryPattern, line)
+            if fullSearch is None:
+                fullSearch = re.search(betLineNoEntryPattern, line)
+
+    out = []
+
+    if fullSearch is None:
+        print('Error in parseBetLine on line: ' + line)
+        for _ in range(1, 5):
+            out.append('ERROR')
+    else:        
+        for i in range(1, 5):
+            out.append(fullSearch.group(i))
+
+    return out
+
 def parseFirstPlace(lines):
     header = lines[0]
     line = lines[1]
 
+    fullSearch = re.search(firstPlaceWPSSearchPatternAlternate, line)
+    if fullSearch is None:
+        fullSearch = re.search(firstPlaceWPSearchPatternAlternate, line)
+        if fullSearch is None:
+            fullSearch = re.search(firstPlaceWSearchPatternAlternate, line)
+    """
     labelSearch = re.search(betLabelPattern, header)
     if labelSearch.group(1) is None:
-        fullSearch = re.search(firstPlaceWSearchPattern, line)
-    elif labelSearch.group(2) is None:
-        fullSearch = re.search(firstPlaceWPSearchPattern, line)
-    else:
-        fullSearch = re.search(firstPlaceWPSSearchPattern, line)
+        fullSearch = re.search(firstPlaceWSearchPatternAlternate, line)
 
+    elif labelSearch.group(2) is None:
+        fullSearch = re.search(firstPlaceWPSearchPatternAlternate, line)
+
+        if fullSearch is None:
+            fullSearch =  re.search(firstPlaceWSearchPatternAlternate, line)
+
+    else:
+        fullSearch = re.search(firstPlaceWPSSearchPatternAlternate, line)
+
+        if fullSearch is None:
+            fullSearch = re.search(firstPlaceWPSearchPatternAlternate, line)
+
+            if fullSearch is None:
+                fullSearch = re.search(firstPlaceWSearchPatternAlternate, line)
+    """
     out = []
 
     if fullSearch is None:
@@ -101,14 +144,17 @@ def parseSecondPlace(lines):
     header = lines[0]
     line = lines[1]
 
+    fullSearch = re.search(secondPlaceWPSSearchPatternAlternate)
+
+    """
     labelSearch = re.search(betLabelPattern, header)
     if labelSearch.group(1) is None:
-        fullSearch = re.search(secondPlaceWSearchPattern, line)
+        fullSearch = re.search(secondPlaceWSearchPatternAlternate, line)
     elif labelSearch.group(2) is None:
-        fullSearch = re.search(secondPlaceWPSearchPattern, line)
+        fullSearch = re.search(secondPlaceWPSearchPatternAlternate, line)
     else:
-        fullSearch = re.search(secondPlaceWPSSearchPattern, line)
-
+        fullSearch = re.search(secondPlaceWPSSearchPatternAlternate, line)
+    """
     out = []
     if fullSearch is None:
         print('Error in parseSecondPlace on line: ' + line)

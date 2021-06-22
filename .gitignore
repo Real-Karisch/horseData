@@ -1,9 +1,10 @@
 /yearhtml/
 /python/__pycache__/
-/charts/chartsXml/
-/charts/chartsPdf/
-/charts/chartsTxt/
-/charts/chartsTest/
+/charts/xmls/
+/charts/pdfs/
+/charts/txts/
+/charts/trial/
 /pdfs/
 /xmls/
 /trial/
+/txts/

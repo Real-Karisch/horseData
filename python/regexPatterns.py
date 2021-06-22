@@ -59,19 +59,32 @@ buyinPattern = r'(\$\d\.\d\d)'
 
 WPSSearchPattern = r'Total WPS Pool: \$([0-9,]*)'
 
+betLineOneEntryPattern = r'\d?\d[ABCX]? .+ (\d?\d?\d\.\d\d)()()(.*)$'
+betLineTwoEntryPattern = r'\d?\d[ABCX]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()(.*)$'
+betLineThreeEntryPattern = r'\d?\d[ABCX]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
+betLineNoEntryPattern = r'\d?\d[ABCX]? [^0-9]+()()()(\$.*)?$'
+
 betLabelPattern = r'Pgm Horse Win (Place)? ?(Show)?'
 firstPlaceWSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d)()()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+firstPlaceWSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d)()()(.*)$'
 firstPlaceWPSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+firstPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()(.*)$'
 firstPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+firstPlaceWPSSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
 
 secondPlaceWSearchPattern = r'\d?\d[ABC]? .+()()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+secondPlaceWSearchPatternAlternate = r'\d?\d[ABC]? .+()()(.*)$'
 secondPlaceWPSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+secondPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)()(.*)$'
 secondPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d) (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+secondPlaceWPSSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
 
 thirdPlaceWPSearchPattern = r'\d?\d[ABC]? .+()( (?=\$\d\.\d\d)([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\)? )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+thirdPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+()(.*)$'
 thirdPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [AL0-9-/]* (\([0-9A-Za-z ]+\)? )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
+thirdPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)(.*)$'
 
-additionalBetLineSearchPattern = r'([0-9.$ A-Za-z,]*) ([0-9-/ABC]*) (\([0-9A-Za-z ]+\) )?([0-9,.]+\.\d\d) ([0-9,.]*)( [0-9,.]*)?$'
+additionalBetLineSearchPattern = r'([0-9.$ A-Za-z,]*) ([0-9-/ABCL ]*) (\([-0-9A-Za-z ]+\) )?([0-9,.]+\.\d\d) ([0-9,.]*)( [0-9,.]*)?$'
 
 
 ### RUNLINEINFOFNS
