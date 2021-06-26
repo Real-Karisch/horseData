@@ -23,35 +23,6 @@ else:
 
     from .infoFns.regexPatterns import *
 
-def bulkParse(dirToFiles):
-    if dirToFiles[-1] != '/':
-        dirToFiles += '/'
-    files = os.listdir(dirToFiles)
-
-    fullDF = pd.DataFrame(columns=['trackName','month','day','year','raceNum','distance','surface','weather','conditions','startTime',
-                                  'startNote','segment1','segment2','segment3','segment4','segment5','segments','lastRaceDay','lastRaceMonth',
-                                  'lastRaceYear','lastRaceTrack','lastRaceNum','lastRacePlace','program','horse','jockey','weight','m_e',
-                                  'placePP','placeSeg1','lengthsSeg1','placeSeg2','lengthsSeg2','placeSeg3','lengthsSeg3','placeSeg4',
-                                  'lengthsSeg4','placeSeg5','lengthsSeg5','placeSeg6','lengthsSeg6','odds','comments','fracTime1','fracTime2',
-                                  'fracTime3','fracTime4','fracTime5','finalTime','runUp','wpsPool','firstPlaceWin','firstPlacePlace',
-                                  'firstPlaceShow','secondPlacePlace','secondPlaceShow','thirdPlaceShow','exactaBuyin','exactaFinish',
-                                  'exactaPayout','exactaPool','trifectaBuyin','trifectaFinish','trifectaPayout','trifectaPool','superfectaBuyin',
-                                  'superfectaFinish','superfectaPayout','superfectaPool','daily doubleBuyin','daily doubleFinish',
-                                  'daily doublePayout','daily doublePool','rlPlaceSeg1','rlLengthsSeg1','rlPlaceSeg2','rlLengthsSeg2',
-                                  'rlPlaceSeg3','rlLengthsSeg3','rlPlaceSeg4','rlLengthsSeg4','rlPlaceSeg5','rlLengthsSeg5','rlPlaceSeg6',
-                                  'rlLengthsSeg6','trainer','owner'])
-    
-    cnt = 0
-    for file in files:
-        with open(dirToFiles + file) as active:
-            chart = active.readlines()
-        dayDF = parseFullDay(chart)
-
-        fullDF = pd.concat([fullDF, dayDF])
-        cnt += 1
-    
-    return fullDF
-
 def parseFullDay(fullChart):
     newRaceInd = [-1] #first index will be 0 after conversion (controls for out of index error later)
     for i in range(len(fullChart)):
@@ -98,21 +69,6 @@ def parseRace(raceChart):
     runlineItems = parseRunlineInfo(raceChart[runLineInd[0]:runLineInd[1]])
     endItems = parseEndInfo(raceChart[endInfoInd:])
 
-    #genRepeated = pd.concat([genItems] * horseItems.shape[0])
-    #timesRepeated = pd.concat([timesItems] * horseItems.shape[0])
-    #betRepeated = pd.concat([betItems] * horseItems.shape[0])
-
-    #horseItems.reset_index(drop=True, inplace=True)
-    #genRepeated.reset_index(drop=True, inplace=True)
-    #timesRepeated.reset_index(drop=True, inplace=True)
-    #betRepeated.reset_index(drop=True, inplace=True)
-    #runlineItems.reset_index(drop=True, inplace=True)  
-    """
-    outDF = pd.concat([genRepeated, horseItems, timesRepeated, betRepeated], axis = 1)
-    outDF = pd.merge(outDF, runlineItems, how='outer', on='program')
-    outDF = pd.merge(outDF, endItems, how='outer', on='program')
-    """
-
     outputDict = {
         'general': genItems,
         'horse': horseItems,
@@ -128,6 +84,6 @@ def parseRace(raceChart):
 
 ######### DEBUG
 if __name__ == '__main__':
-    with open('./../charts/txts/eqbPDFChartPlus - 2021-06-10T234213.019.txt') as file:
+    with open('./../charts/txts/eqbPDFChartPlus - 2021-06-25T173458.431.txt') as file:
         full = file.readlines()
         jack = parseFullDay(full)

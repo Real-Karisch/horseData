@@ -40,15 +40,13 @@ def generateRaceUrlsFromLinks(dayList):
     return urls
 
 
-def saveRaceUrlsFromFiles():
-    files = os.listdir('./../yearhtml')
+def saveRaceUrlsFromFiles(filesAddress):
+    files = os.listdir(filesAddress)
     urls = []
     for file in files:
-        dayLinks = getLinks('./../yearhtml/'+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
+        dayLinks = getLinks(filesAddress+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
         urls += generateRaceUrlsFromLinks(dayLinks)
     
     with open('./../excel/raceUrls.csv', 'w') as file:
         for item in urls:
             file.write('%s\n' % item)
-
-saveRaceUrlsFromFiles()

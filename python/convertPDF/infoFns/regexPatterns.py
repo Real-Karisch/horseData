@@ -1,10 +1,14 @@
+### BUILDING BLOCKS
+horseProgramPattern = r'\d?\d[ABCXabcx]?'
+horsePlacePattern = r'[-0-9*]*'
+
 ### DRIVER
 newRaceTest = r'Copyright 202[0-9] Equibase Company LLC. All Rights Reserved.'
 
 cancelledRace = r'Cancelled - '
 quarterHorseRace = r'(- Quarter Horse|Arabian|Mixed)'
 generalInfoCutoff = r'Last Raced Pgm'
-horseInfoCutoff = r'Fractional Times:|Final Time:'
+horseInfoCutoff = r'Fractional Times:|[^*]Final Time:'
 timesInfoCutoff = r'Run-Up: '
 betInfoCutoff = r'Past Performance Running Line Preview'
 endInfoCutoff = r'Trainers: '
@@ -17,13 +21,15 @@ startNotesLinePattern = r'Off at: [0-9:]+ Start:'
 segmentsLinePattern = r'Last Raced Pgm'
 
 genInfoLine1TrackPattern = r' *([^-]+) - ([^-]+) - (.*)'
+stakesLinePattern = r'([Ss]takes|TAKES)'
+gradePattern = r'([Gg]rade \d|Listed|Black Type)'
 genInfoLine1LethbridgePattern = r' *([^-]+-[^-]+) - ([^-]+) - ([^-]+)'
 genInfoLine1DatePattern = r'([A-Za-z]*) (\d?\d), (\d\d\d\d)'
 genInfoLine1RaceNumPattern = r'\d?\d'
 
 genInfoLine2BreedPattern = r'- (.*)$'
 
-distanceSurfaceFullSearchPattern = r'([- A-Za-z]+)(?=(Current )?Track)'
+distanceSurfaceFullSearchPattern = r'([- A-Za-z0-9/]+)(?=(Current )?Track)'
 distanceSurfaceSpecSearchPattern = r' (.*) (?=On The)On The ([-A-Za-z ]*) ?'
 
 weatherConditionsSearchPattern = r'Weather: ([A-Z][a-z]*) Track: ([A-Z][a-z]*)'
@@ -38,7 +44,7 @@ horseInfoBottomLineCheckPattern = r'^ (\d?\d[A-Z][a-z]{2}\d\d|---)'
 
 horseInfoTopLineSearchPattern = r'^ ([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*) ?([0-9/A-Za-z]*)'
 
-horseInfoBottomLineSearchPattern = r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (\d?\d[ABCX]?) ([^0-9]+) (\d?\d?\d)[»½¶]* ([ABCLM]+|[ABCLM]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) ([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ?([-0-9]*) ([0-9]+\.\d\d)?\*? ?(.*)$'
+horseInfoBottomLineSearchPattern = r'^ (\d?\d[A-Z][a-z]{2}\d\d [A-Z]{2,3}|---) (' + horseProgramPattern + r') ([^0-9]+) (\d?\d?\d)[»½¶]* ([ABCLM1]+|[ABCLM1]+ [23abcfghijklnopqrsvWwxyz]+|- -|[23abcfghijklnopqrsvWwxyz]+) (' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ([0-9]+\.\d\d)?\*? ?(.*)$'
 horseInfoDateSearchPattern = r'(\d?\d)([A-Z][a-z]{2})(\d\d) ([A-Z]{2,3})'
 horseJockeySearchPattern = r"(.*) ?\(([-A-Za-z,. ']+)\)"
 
@@ -54,47 +60,27 @@ runupSearchPattern = r'Run-Up: ([0-9.]*)'
 #### BETINFOFNS
 WPSLinePattern = r'Total WPS Pool'
 betsLinePattern = r'Pgm Horse Win'
-advancedBetsLinePattern = r'(Exacta|Trifecta|Superfecta|Daily Double)'
+advancedBetsLinePattern = r'(Exacta|Trifecta|Superfecta|Quinella)'
 buyinPattern = r'(\$\d\.\d\d)'
 
 WPSSearchPattern = r'Total WPS Pool: \$([0-9,]*)'
 
-betLineOneEntryPattern = r'^ \d?\d[ABCX]? [^0-9]+ (\d?\d?\d\.\d\d)()()(.*)$'
-betLineTwoEntryPattern = r'^ \d?\d[ABCX]? [^0-9]+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()(.*)$'
-betLineThreeEntryPattern = r'^ \d?\d[ABCX]? [^0-9]+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
-betLineNoEntryPattern = r'^ \d?\d[ABCX]? [^0-9]+()()()(\$.*)?$'
+betLineOneEntryPattern = r'^ ' + horseProgramPattern + r' [^0-9]+ (\d?\d?\d\.\d\d)()()(.*)$'
+betLineTwoEntryPattern = r'^ ' + horseProgramPattern + r' [^0-9]+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()(.*)$'
+betLineThreeEntryPattern = r'^ ' + horseProgramPattern + r' [^0-9]+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
+betLineNoEntryPattern = r'^ ' + horseProgramPattern + r' [^0-9]+()()()(\$.*)?$'
 
-betLabelPattern = r'Pgm Horse Win (Place)? ?(Show)?'
-firstPlaceWSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d)()()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-firstPlaceWSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d)()()(.*)$'
-firstPlaceWPSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-firstPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d)()(.*)$'
-firstPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-firstPlaceWPSSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d?\d\.\d\d) (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
-
-secondPlaceWSearchPattern = r'\d?\d[ABC]? .+()()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-secondPlaceWSearchPatternAlternate = r'\d?\d[ABC]? .+()()(.*)$'
-secondPlaceWPSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)()( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-secondPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)()(.*)$'
-secondPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d) (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\) )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-secondPlaceWPSSearchPatternAlternate = r'\d?\d[ABC]? .+ (\d?\d\.\d\d) (\d?\d\.\d\d)(.*)$'
-
-thirdPlaceWPSearchPattern = r'\d?\d[ABC]? .+()( (?=\$\d\.\d\d)([0-9.$ A-Za-z,]* [0-9-/]* (\([0-9A-Za-z ]+\)? )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-thirdPlaceWPSearchPatternAlternate = r'\d?\d[ABC]? .+()(.*)$'
-thirdPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)( ([0-9.$ A-Za-z,]* [AL0-9-/]* (\([0-9A-Za-z ]+\)? )?[0-9,.]+ [0-9,.]*)( [0-9,.]*)?)?$'
-thirdPlaceWPSSearchPattern = r'\d?\d[ABC]? .+ (\d?\d\.\d\d)(.*)$'
-
-additionalBetLineSearchPattern = r'([0-9.$ A-Za-z,]*) ([0-9-/ABCL ]*) (\([-0-9A-Za-z ]+\) )?([0-9,.]+\.\d\d) ([0-9,.]*)( [0-9,.]*)?$'
+additionalBetLineSearchPattern = r'([0-9.$ A-Za-z,]*) ([0-9-/ABCL* ]*) (\([-0-9A-Za-z ]+\) )?([0-9,.]+\.\d\d) ([0-9,.]*)( [0-9,.]*)?$'
 
 
 ### RUNLINEINFOFNS
 pointOfCallLinePattern = r'^ Pgm Horse Name (Start|[0-9/]+)'
-firstCallStartRLSearchPattern = r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$'
-firstCallNonStartRLSearchPattern = r'^ (\d?\d[ABC]?) [^0-9]+ \d?\d[ABC]?( ---)+$'
+firstCallStartRLSearchPattern = r'^ (' + horseProgramPattern + r') [^0-9]+ \d?\d[ABC]?( ---)+$'
+firstCallNonStartRLSearchPattern = r'^ (' + horseProgramPattern + r') [^0-9]+ \d?\d[ABC]?( ---)+$'
 
 rlTopLineSearchPattern = r'([-0-9/A-Za-z]+) ?([-0-9/A-Za-z]*) ?([-0-9/A-Za-z]*) ?([-0-9/A-Za-z]*) ?([-0-9/A-Za-z]*) ?([-0-9/A-Za-z]*)$'
 
-rlBottomLineSearchPattern = r'^ (\d?\d[ABCX]?) [^0-9]+ ([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*) ?([0-9-]*)$'
+rlBottomLineSearchPattern = r'^ (' + horseProgramPattern + r') [^0-9]+ (' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r') ?(' + horsePlacePattern + r')$'
 
 
 ### ENDITEMSFNS

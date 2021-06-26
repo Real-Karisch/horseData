@@ -95,6 +95,7 @@ CREATE TABLE main.races (
     track character varying(50) NOT NULL,
     date character varying(200) NOT NULL,
     race character varying(100) NOT NULL,
+    stakes character varying(100),
     distance character varying(200),
     surface character varying(150),
     weather character varying(200),

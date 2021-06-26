@@ -26,7 +26,7 @@ def parseBetInfo(betLines):
         ind += 1
 
     if wpsInd == -1:
-        print('No betting detected for race.')
+        #print('No betting detected for race.')
         return {}
     
     linesCleaned = [x for x in betLines[betStartInd+1:] if re.search(r'^ (\d?\d[ABC]?|\$\d)', x) is not None]

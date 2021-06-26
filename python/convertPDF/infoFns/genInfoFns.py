@@ -8,6 +8,7 @@ def parseGenInfo(genLines):
     dfDict = {}
     
     dfDict['trackName'], dfDict['month'], dfDict['day'], dfDict['year'], dfDict['raceNum'] = parseLine1(genLines[0])
+    dfDict['stakes'] = parseLine2(genLines[1])
     
     for line in genLines[0:]:
         if re.search(distanceSurfaceLinePattern, line) is not None:
@@ -62,8 +63,15 @@ def parseLine1(line):
 
 def parseLine2(line):
     breedRaw = re.search(genInfoLine2BreedPattern, line).group(1)
+    stakes = ''
+    if re.search(stakesLinePattern, line) is not None:
+        stakesSearch = re.search(gradePattern, line)
+        if stakesSearch is None:
+            stakes = 'General'
+        else:
+            stakes = stakesSearch.group(1)
     breed = re.sub('[^A-Za-z]', '', breedRaw)
-    return breed
+    return stakes
 
 def parseDistanceSurface(line):
     fullSearch = re.search(distanceSurfaceFullSearchPattern, line)
@@ -74,12 +82,16 @@ def parseDistanceSurface(line):
 
     if specSearch is None:
         print('Match error in parseDistanceSurface on line: ' + line)
+        return ['ERROR', 'ERROR']
 
-    distanceRaw, surface = [specSearch.group(1), specSearch.group(2)]
+    distance, surface = [specSearch.group(1).strip(), specSearch.group(2).strip()]
+
+    if re.search('- Originally', surface) is not None:
+        surface = re.search(r'([A-Za-z ]+)-', surface).group(1).strip()
 
     surface = re.sub(r' Current', '', surface)
 
-    out = [distanceRaw, surface]
+    out = [distance, surface]
 
     return out
 
@@ -123,7 +135,7 @@ def parseSegments(line):
 
 trackLongToShort = {}
 trackShortToLong = {}
-tracksDF = pd.read_csv('./../excel/tracks_v03.csv', delimiter=',', header=None)
+tracksDF = pd.read_csv('./../excel/tracks.csv', delimiter=',', header=None)
 for i in range(tracksDF.shape[0]):
     trackLongToShort[tracksDF.iloc[i,1]] = tracksDF.iloc[i,0]
     trackShortToLong[tracksDF.iloc[i,0]] = tracksDF.iloc[i,1]

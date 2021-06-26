@@ -96,15 +96,14 @@ def bulkXml2Txt(xmlDir, txtDir):
     cnt = 0
     for filename in filenames:
         cnt += 1
-        if filename in extantFiles:
+        if filename in extantFiles or re.search(r'.txt', filename) is None:
             continue
-        print(filename) #delete this once working
         with open(xmlDir + filename) as file:
             rawXml = file.read()
             soup = BeautifulSoup(rawXml, 'html.parser')
     
         createTxtFromXml(soup, txtDir + filename)
 
-        if cnt % 20 == 0:
+        if cnt % 100 == 0:
             perc = cnt / len(filenames) * 100
             print('Progress: %.1f%%' % perc)

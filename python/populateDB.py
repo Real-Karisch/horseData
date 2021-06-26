@@ -8,7 +8,16 @@ def generateEntries(txtFolderAddress):
     entries = {'races': [], 'horses': []}
 
     fileNames = os.listdir(txtFolderAddress)
+    totalFiles = len(fileNames)
+    print('Converting', totalFiles, 'files')
+    fileCnt = 0
     for fileName in fileNames:
+        #if fileCnt > 1500:
+         #   print(fileName)
+        if fileCnt % 300 == 0:
+            print(fileCnt)
+        fileCnt += 1
+
         with open(txtFolderAddress + '/' + fileName) as file:
             chart = file.readlines()
             dayEntries = parseFullDay(chart)
@@ -22,25 +31,26 @@ def generateEntries(txtFolderAddress):
                     raceEntries['general']['trackName'],
                     str(raceEntries['general']['month']) + '/' + str(raceEntries['general']['day']) + '/' + str(raceEntries['general']['year']),
                     str(raceEntries['general']['raceNum']),
-                    raceEntries['general']['distance'],
-                    raceEntries['general']['surface'],
-                    raceEntries['general']['weather'],
-                    raceEntries['general']['conditions'],
-                    raceEntries['general']['startTime'],
-                    raceEntries['general']['startNote'],
-                    raceEntries['general']['segment1'],
-                    raceEntries['general']['segment2'],
-                    raceEntries['general']['segment3'],
-                    raceEntries['general']['segment4'],
-                    raceEntries['general']['segment5'],
-                    raceEntries['general']['segments'],
-                    raceEntries['times']['fracTime1'],
-                    raceEntries['times']['fracTime2'],
-                    raceEntries['times']['fracTime3'],
-                    raceEntries['times']['fracTime4'],
-                    raceEntries['times']['fracTime5'],
-                    raceEntries['times']['finalTime'],
-                    raceEntries['times']['runUp'],
+                    dictTry(raceEntries, ['general', 'stakes']),
+                    dictTry(raceEntries, ['general', 'distance']),
+                    dictTry(raceEntries, ['general', 'surface']),
+                    dictTry(raceEntries, ['general', 'weather']),
+                    dictTry(raceEntries, ['general', 'conditions']),
+                    dictTry(raceEntries, ['general', 'startTime']),
+                    dictTry(raceEntries, ['general', 'startNote']),
+                    dictTry(raceEntries, ['general', 'segment1']),
+                    dictTry(raceEntries, ['general', 'segment2']),
+                    dictTry(raceEntries, ['general', 'segment3']),
+                    dictTry(raceEntries, ['general', 'segment4']),
+                    dictTry(raceEntries, ['general', 'segment5']),
+                    dictTry(raceEntries, ['general', 'segments']),
+                    dictTry(raceEntries, ['times', 'fracTime1']),
+                    dictTry(raceEntries, ['times', 'fracTime2']),
+                    dictTry(raceEntries, ['times', 'fracTime3']),
+                    dictTry(raceEntries, ['times', 'fracTime4']),
+                    dictTry(raceEntries, ['times', 'fracTime5']),
+                    dictTry(raceEntries, ['times', 'finalTime']),
+                    dictTry(raceEntries, ['times', 'runUp']),
                     dictTry(raceEntries, ['bet','wpsPool']),
                     dictTry(raceEntries, ['bet', 'firstPlaceWin']),
                     dictTry(raceEntries, ['bet', 'firstPlacePlace']),
@@ -152,6 +162,7 @@ def populateRaces(dbConnection, entries):
                 track, 
                 date,
                 race,
+                stakes,
                 distance,
                 surface,
                 weather,
@@ -189,7 +200,7 @@ def populateRaces(dbConnection, entries):
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                        %s)
+                        %s, %s)
             """,
             entries
         )
