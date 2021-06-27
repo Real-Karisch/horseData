@@ -39,11 +39,13 @@ def generateTrackKey(htmlFileAddress, outputCsvAddress):
             'PMT',
             'UN',
             'EDR',
+            'CHA',
         ],
         'fullName': [
             'PINE MTNCALLAWAY GARDEN',
             'EASTERN OREGON LIVESTOCK SHO W',
             'ENERGY DOWNS',
+            'CHARLESTON',
         ]
     }
 

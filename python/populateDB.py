@@ -11,9 +11,11 @@ def generateEntries(txtFolderAddress):
     totalFiles = len(fileNames)
     print('Converting', totalFiles, 'files')
     fileCnt = 0
+
+    alreadyPulled = []
     for fileName in fileNames:
         #if fileCnt > 1500:
-         #   print(fileName)
+        #   print(fileName)
         if fileCnt % 300 == 0:
             print(fileCnt)
         fileCnt += 1
@@ -25,6 +27,12 @@ def generateEntries(txtFolderAddress):
         for raceEntries in dayEntries:
             if raceEntries == {}:
                 continue
+
+            racePk = (raceEntries['general']['trackName'], str(raceEntries['general']['month']) + '/' + str(raceEntries['general']['day']) + '/' + str(raceEntries['general']['year']), str(raceEntries['general']['raceNum']))
+            if racePk in alreadyPulled:
+                continue
+
+            alreadyPulled.append(racePk)
 
             entries['races'].append(
                 (
@@ -148,6 +156,10 @@ def generateEntries(txtFolderAddress):
     return entries
 
 def populateDB(dbConnection, entries):
+    with dbConnection.cursor() as cur:
+        cur.execute("SELECT track, race, stakes FROM main.races;")
+        alreadyPulled = cur.fetchall()
+
     populateRaces(dbConnection, entries['races'])
     populateHorses(dbConnection, entries['horses'])
 

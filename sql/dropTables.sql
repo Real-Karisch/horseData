@@ -1,0 +1,2 @@
+DROP TABLE main.horses CASCADE;
+DROP TABLE main.races CASCADE;

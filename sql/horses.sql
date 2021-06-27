@@ -80,7 +80,7 @@ CREATE TABLE main.horses (
     "rlPlaceSeg5" character varying(50),
     "rlPlaceSeg6" character varying(50),
     trainer character varying(200),
-    owner character varying(200)
+    owner character varying(250)
 );
 
 
