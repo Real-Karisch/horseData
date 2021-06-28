@@ -156,10 +156,6 @@ def generateEntries(txtFolderAddress):
     return entries
 
 def populateDB(dbConnection, entries):
-    with dbConnection.cursor() as cur:
-        cur.execute("SELECT track, race, stakes FROM main.races;")
-        alreadyPulled = cur.fetchall()
-
     populateRaces(dbConnection, entries['races'])
     populateHorses(dbConnection, entries['horses'])
 
@@ -295,3 +291,16 @@ def dictTry(dictionary, keys, listIndices=[], naFlag=True):
                 return 'N/A' if naFlag else ''
 
     return thing
+
+### DEBUG
+if __name__ == '__main__':
+    entries = generateEntries('./../charts/txts')
+    conn = psycopg2.connect(
+        host = "localhost",
+        database = "horses",
+        user = "karisch",
+        password = "cocacola",
+        port = 5432
+    )
+
+    populateDB(conn, entries)

@@ -35,7 +35,7 @@ def parseFractionalTimes(line):
 
     out = []
     for i in range(2,8):
-        if fullSearch.group(i) is None:
+        if fullSearch.group(i) is None or fullSearch.group(i) == 'N/A':
             out.append('')
         else:
             out.append(fullSearch.group(i))

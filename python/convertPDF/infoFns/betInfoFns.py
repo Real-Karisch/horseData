@@ -40,13 +40,17 @@ def parseBetInfo(betLines):
     betDict['firstPlaceWin'] = firstPlaceItems[0]
     betDict['firstPlacePlace'] = firstPlaceItems[1]
     betDict['firstPlaceShow'] = firstPlaceItems[2]
-    betDict['secondPlacePlace'] = secondPlaceItems[0]
-    betDict['secondPlaceShow'] = secondPlaceItems[1]
+    if secondPlaceItems[2] != '':
+        betDict['secondPlacePlace'] = secondPlaceItems[1]
+        betDict['secondPlaceShow'] = secondPlaceItems[2]
+    else:
+        betDict['secondPlacePlace'] = secondPlaceItems[0]
+        betDict['secondPlaceShow'] = secondPlaceItems[1]
     
     if len(linesCleaned) > 2:
         thirdPlaceItems = parseBetLine(linesCleaned[2])
 
-        betDict['thirdPlaceShow'] = thirdPlaceItems[0]
+        betDict['thirdPlaceShow'] = thirdPlaceItems[1] if thirdPlaceItems[1] != '' else thirdPlaceItems[0]
 
         additionalLines = betLines[(betStartInd + 4):] + [firstPlaceItems[-1], secondPlaceItems[-1], thirdPlaceItems[-1]]
 

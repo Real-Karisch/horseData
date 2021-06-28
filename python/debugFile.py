@@ -1,4 +1,7 @@
 from convertPDF.infoFns.genInfoFns import parseDistanceSurface
+from convertPDF.driver import parseFullDay
 
-line = ' Six Furlongs On The Dirt - Originally Scheduled For 1 1/16 Miles On Turf Current Track Recond: (Penis McGee - 1:07.56 - June 1, 2021'
-parseDistanceSurface(line)
+with open('./../charts/txts/eqbPDFChartPlus - 2021-06-25T172752.327.txt') as file:
+    full = file.read()
+
+jack = parseFullDay(full)

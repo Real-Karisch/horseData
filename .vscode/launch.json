@@ -12,7 +12,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "~/projects/horseData/python"
+            "cwd": "~/projects/horseData/python",
         }
     ]
 }

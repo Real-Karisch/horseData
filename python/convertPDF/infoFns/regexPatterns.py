@@ -1,6 +1,7 @@
 ### BUILDING BLOCKS
 horseProgramPattern = r'\d?\d[ABCXabcx]?'
 horsePlacePattern = r'[-0-9*]*'
+splitTimePattern = r'[0-9.:N/A]*'
 
 ### DRIVER
 newRaceTest = r'Copyright 202[0-9] Equibase Company LLC. All Rights Reserved.'
@@ -15,7 +16,7 @@ endInfoCutoff = r'Trainers: '
 
 
 ### GENINFOFNS
-distanceSurfaceLinePattern = r'(Track Record:|Furlongs On The (Dirt|Turf)$|Miles? On The (Dirt|Turf)$)'
+distanceSurfaceLinePattern = r'(Current Track( Record:)?|Furlongs On (The )?(Dirt|Turf)$|Miles? On (The )?(Dirt|Turf)$)'
 weatherConditionsLinePattern = r'Weather: [A-Za-z]+ Track:'
 startNotesLinePattern = r'Off at: [0-9:]+ Start:'
 segmentsLinePattern = r'Last Raced Pgm'
@@ -53,7 +54,7 @@ horseJockeySearchPattern = r"(.*) ?\(([-A-Za-z,. ']+)\)"
 fractionalTimesLinePattern = r'Fractional Times:|Final Time:'
 runupLinePattern = r'Run-Up:'
 
-fractionalTimesSearchPattern = r'(Fractional Times: ([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*) ?([0-9.:]*))? Final Time: ([0-9.:]*)'
+fractionalTimesSearchPattern = r'(Fractional Times: (' + splitTimePattern + r') ?(' + splitTimePattern + r') ?(' + splitTimePattern + r') ?(' + splitTimePattern + r') ?(' + splitTimePattern + r'))? Final Time: (' + splitTimePattern + r')'
 runupSearchPattern = r'Run-Up: ([0-9.]*)'
 
 

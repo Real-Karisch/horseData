@@ -144,10 +144,14 @@ def placeLengths(horseDicts, topItemsList):
         if segCnt - nonBlankCnt == 1:
             topItemsList[horseCnt][1:] = topItemsList[horseCnt][:-1]
             topItemsList[horseCnt][0] = horseDict['lastRacePlace']
+            horseDict['lastRacePlace'] = horseDict['lastRaceNum']
+            horseDict['lastRaceNum'] = ''
         elif segCnt - nonBlankCnt == 2:
             topItemsList[horseCnt][2:] = topItemsList[horseCnt][:-2]
             topItemsList[horseCnt][0] = horseDict['lastRaceNum']
             topItemsList[horseCnt][1] = horseDict['lastRacePlace']
+            horseDict['lastRacePlace'] = ''
+            horseDict['lastRaceNum'] = ''
         
         horseCnt += 1
     
