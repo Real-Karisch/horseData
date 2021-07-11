@@ -129,7 +129,15 @@ CREATE TABLE main.races (
     "trifectaBuyin" character varying(100),
     "trifectaFinish" character varying(100),
     "trifectaPayout" character varying(100),
-    "trifectaPool" character varying(100)
+    "trifectaPool" character varying(100),
+    "superfectaBuyin" character varying(100),
+    "superfectaFinish" character varying(100),
+    "superfectaPayout" character varying(100),
+    "superfectaPool" character varying(100),
+    "quinellaBuyin" character varying(100),
+    "quinellaFinish" character varying(100),
+    "quinellaPayout" character varying(100),
+    "quinellaPool" character varying(100)
 );
 
 

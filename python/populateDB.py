@@ -73,7 +73,15 @@ def generateEntries(txtFolderAddress):
                     dictTry(raceEntries, ['bet','trifectaBuyin']),
                     dictTry(raceEntries, ['bet','trifectaFinish']),
                     dictTry(raceEntries, ['bet','trifectaPayout']),
-                    dictTry(raceEntries, ['bet', 'trifectaPool'])
+                    dictTry(raceEntries, ['bet', 'trifectaPool']),
+                    dictTry(raceEntries, ['bet','superfectaBuyin']),
+                    dictTry(raceEntries, ['bet','superfectaFinish']),
+                    dictTry(raceEntries, ['bet','superfectaPayout']),
+                    dictTry(raceEntries, ['bet', 'superfectaPool']),
+                    dictTry(raceEntries, ['bet','quinellaBuyin']),
+                    dictTry(raceEntries, ['bet','quinellaFinish']),
+                    dictTry(raceEntries, ['bet','quinellaPayout']),
+                    dictTry(raceEntries, ['bet', 'quinellaPool']),
                 )
             )
 
@@ -204,11 +212,19 @@ def populateRaces(dbConnection, entries):
                 "trifectaBuyin",
                 "trifectaFinish",
                 "trifectaPayout",
-                "trifectaPool"
+                "trifectaPool",
+                "superfectaBuyin",
+                "superfectaFinish",
+                "superfectaPayout",
+                "superfectaPool",
+                "quinellaBuyin",
+                "quinellaFinish",
+                "quinellaPayout",
+                "quinellaPool"
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                        %s, %s)
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             entries
         )

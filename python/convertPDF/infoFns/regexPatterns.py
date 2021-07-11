@@ -1,5 +1,5 @@
 ### BUILDING BLOCKS
-horseProgramPattern = r'\d?\d[ABCXabcx]?'
+horseProgramPattern = r'\d?\d[ABCXabcfx]?'
 horsePlacePattern = r'[-0-9*]*'
 splitTimePattern = r'[0-9.:N/A]*'
 

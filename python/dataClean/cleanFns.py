@@ -21,17 +21,23 @@ def racesClean(racesdf):
     outdf = numClean(outdf, 'runup')
 
     outdf.loc[:, 'exactaPool'] = outdf['exactaPool'].str.replace(',', '')
-    outdf.loc[:, 'exactaPool'] = outdf['exactaPool'].str.extract('(\d+)\.?')
+    outdf.loc[:, 'exactaPool'] = outdf['exactaPool'].str.extract('(\d+)\.?')[0]
     outdf = numClean(outdf, 'exactaPool')
     outdf.loc[:, 'trifectaPool'] = outdf['trifectaPool'].str.replace(',', '')
-    outdf.loc[:, 'trifectaPool'] = outdf['trifectaPool'].str.extract('(\d+)\.?')
+    outdf.loc[:, 'trifectaPool'] = outdf['trifectaPool'].str.extract('(\d+)\.?')[0]
     outdf = numClean(outdf, 'trifectaPool')
     outdf.loc[:, 'exactaPayout'] = outdf['exactaPayout'].str.replace(',', '')
-    outdf.loc[:, 'exactaPayout'] = outdf['exactaPayout'].str.extract('(\d+)\.?')
+    outdf.loc[:, 'exactaPayout'] = outdf['exactaPayout'].str.extract('(\d+)\.?')[0]
     outdf = numClean(outdf, 'exactaPayout')
     outdf.loc[:, 'trifectaPayout'] = outdf['trifectaPayout'].str.replace(',', '')
-    outdf.loc[:, 'trifectaPayout'] = outdf['trifectaPayout'].str.extract('(\d+)\.?')
+    outdf.loc[:, 'trifectaPayout'] = outdf['trifectaPayout'].str.extract('(\d+)\.?')[0]
     outdf = numClean(outdf, 'trifectaPayout')
+    outdf.loc[:, 'superfectaPayout'] = outdf['superfectaPayout'].str.replace(',', '')
+    outdf.loc[:, 'superfectaPayout'] = outdf['superfectaPayout'].str.extract('(\d+)\.?')[0]
+    outdf = numClean(outdf, 'superfectaPayout')
+    outdf.loc[:, 'quinellaPayout'] = outdf['quinellaPayout'].str.replace(',', '')
+    outdf.loc[:, 'quinellaPayout'] = outdf['quinellaPayout'].str.extract('(\d+)\.?')[0]
+    outdf = numClean(outdf, 'quinellaPayout')
     
     outdf.loc[:, 'distance'] = pd.Series([0] * outdf.shape[0])
 
@@ -230,5 +236,5 @@ segmentDict = {
 }
 
 if __name__ == '__main__':
-    df = pd.read_csv('./../outputs/horses.csv', dtype='string')
-    jack = horsesClean(df)
+    df = pd.read_csv('./../outputs/races.csv', dtype='string')
+    jack = racesClean(df)
