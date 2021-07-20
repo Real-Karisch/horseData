@@ -62,6 +62,8 @@ def parseBetInfo(betLines):
             
             if keywordSearch is not None:
                 keyword = re.sub(' ','',keywordSearch.group(1).lower())
+                if keyword == 'perfecta':
+                    keyword = 'exacta'
 
                 activeAdditional = parseAdditionalBetLines(line)
 

@@ -40,6 +40,8 @@ def racesClean(racesdf):
     outdf = numClean(outdf, 'quinellaPayout')
     
     outdf.loc[:, 'distance'] = pd.Series([0] * outdf.shape[0])
+    aboutDistances = outdf['distanceStr'].str.extract('About (.*)').dropna()
+    outdf.loc[aboutDistances.index, 'distanceStr'] = aboutDistances[0]
 
     for distanceKey, distanceValue in distanceDict.items():
         outdf.loc[outdf['distanceStr'] == distanceKey, 'distance'] = distanceValue

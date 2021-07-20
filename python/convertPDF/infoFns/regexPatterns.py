@@ -61,7 +61,7 @@ runupSearchPattern = r'Run-Up: ([0-9.]*)'
 #### BETINFOFNS
 WPSLinePattern = r'Total WPS Pool'
 betsLinePattern = r'Pgm Horse Win'
-advancedBetsLinePattern = r'(Exacta|Trifecta|Superfecta|Quinella)'
+advancedBetsLinePattern = r'(Exacta|Trifecta|Superfecta|Quinella|Perfecta)'
 buyinPattern = r'(\$\d\.\d\d)'
 
 WPSSearchPattern = r'Total WPS Pool: \$([0-9,]*)'
