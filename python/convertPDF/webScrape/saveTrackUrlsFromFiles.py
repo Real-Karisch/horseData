@@ -47,6 +47,6 @@ def saveRaceUrlsFromFiles(filesAddress):
         dayLinks = getLinks(filesAddress+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
         urls += generateRaceUrlsFromLinks(dayLinks)
     
-    with open('./../excel/raceUrls.csv', 'w') as file:
+    with open('C:/Users/jackk/Projects/horseData/excel/raceUrls.csv', 'w') as file:
         for item in urls:
             file.write('%s\n' % item)

@@ -135,7 +135,7 @@ def parseSegments(line):
 
 trackLongToShort = {}
 trackShortToLong = {}
-tracksDF = pd.read_csv('./../excel/tracks.csv', delimiter=',', header=None)
+tracksDF = pd.read_csv('C:/Users/jackk/Projects/horseData/excel/tracks.csv', delimiter=',', header=None)
 for i in range(tracksDF.shape[0]):
     trackLongToShort[tracksDF.iloc[i,1]] = tracksDF.iloc[i,0]
     trackShortToLong[tracksDF.iloc[i,0]] = tracksDF.iloc[i,1]

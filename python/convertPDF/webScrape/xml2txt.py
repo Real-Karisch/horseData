@@ -19,7 +19,7 @@ def uniqueXmlRows(soupObj):
         row = []
         for span in spanList:
             bbox = span.get('bbox')
-            bboxSearch = re.search('\d+ (\d+) \d+ (\d+)', bbox)
+            bboxSearch = re.search(r'\d+ (\d+) \d+ (\d+)', bbox)
             row.append(int(bboxSearch.group(1)))
 
         rowUnique = sorted(list(set(row)))
@@ -56,7 +56,7 @@ def createTxtFromXml(soupObj, outputFile):
             for char in charList:
                 bbox = char.get('bbox')
                 c = char.get('c')
-                bboxSearch = re.search('(\d+) (\d+) (\d+) \d+', bbox)
+                bboxSearch = re.search(r'(\d+) (\d+) (\d+) \d+', bbox)
                 if bboxSearch is None:
                     print('Error - no match')
                     print('Page =', i)

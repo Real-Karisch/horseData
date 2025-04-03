@@ -13,7 +13,7 @@ def renameHtml(folderAddress):
 
             date = re.search(r', (.*)', soup.center.text.strip()).group(1)
 
-            os.rename(folderAddress + '/' + fileName, folderAddress + '/' + date + '.html')
+        os.rename(folderAddress + '/' + fileName, folderAddress + '/' + date + '.html')
             
 
 def generateTrackKey(htmlFileAddress, outputCsvAddress):

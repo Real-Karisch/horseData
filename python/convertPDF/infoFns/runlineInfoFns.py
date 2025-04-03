@@ -4,7 +4,7 @@ import pandas as pd
 from .regexPatterns import *
 
 def parseRunlineInfo(runlineLines):
-    runlineLines = [x for x in runlineLines if re.search('^ \([A-Z]+\)$', x) is None]
+    runlineLines = [x for x in runlineLines if re.search(r'^ \([A-Z]+\)$', x) is None]
 
     colsSearch = re.search(pointOfCallLinePattern, runlineLines[1])
     if colsSearch.group(1) == 'Start':

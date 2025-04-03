@@ -84,6 +84,6 @@ def parseRace(raceChart):
 
 ######### DEBUG
 if __name__ == '__main__':
-    with open('./../charts/txts/eqbPDFChartPlus - 2021-07-10T204831.617.txt') as file:
+    with open('C:/Users/jackk/Projects/horseData/charts/txts/AJAXDOWNS_05.05.2019.txt') as file:
         full = file.readlines()
         jack = parseFullDay(full)

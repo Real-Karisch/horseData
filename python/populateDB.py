@@ -14,13 +14,13 @@ def generateEntries(txtFolderAddress):
 
     alreadyPulled = []
     for fileName in fileNames:
-        #if fileCnt > 1500:
+        #if fileCnt > 600:
         #   print(fileName)
         if fileCnt % 300 == 0:
             print(fileCnt)
         fileCnt += 1
 
-        with open(txtFolderAddress + '/' + fileName) as file:
+        with open(txtFolderAddress + '/' + fileName, encoding='cp1252') as file:
             chart = file.readlines()
             dayEntries = parseFullDay(chart)
 
@@ -310,7 +310,7 @@ def dictTry(dictionary, keys, listIndices=[], naFlag=True):
 
 ### DEBUG
 if __name__ == '__main__':
-    entries = generateEntries('./../charts/txts')
+    entries = generateEntries('C:/Users/jackk/Projects/horseData/charts/txts')
     conn = psycopg2.connect(
         host = "localhost",
         database = "horses",
@@ -320,3 +320,7 @@ if __name__ == '__main__':
     )
 
     populateDB(conn, entries)
+
+    conn.commit()
+
+    conn.close()
