@@ -1,6 +1,6 @@
 ^j::
-i:=51
-Loop, 8 {
+i:=1
+Loop, 20 {
     Send, ^s
     Sleep, 3000
     Send, equibase%i%
