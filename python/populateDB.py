@@ -163,18 +163,18 @@ def generateEntries(txtFolderAddress):
     
     return entries
 
-def populateDB(dbConnection, entries):
-    populateRaces(dbConnection, entries['races'])
-    populateHorses(dbConnection, entries['horses'])
+def populateDB(dbConnection, entries, schema='main'):
+    populateRaces(dbConnection, entries['races'], schema)
+    populateHorses(dbConnection, entries['horses'], schema)
 
-def populateRaces(dbConnection, entries):
+def populateRaces(dbConnection, entries, schema='main'):
     with dbConnection.cursor() as cur:
         cur.execute("SET session_replication_role='replica';")
 
         psycopg2.extras.execute_batch(
             cur,
-            """
-            INSERT INTO main.races(
+            f"""
+            INSERT INTO {schema}.races(
                 track, 
                 date,
                 race,
@@ -229,14 +229,14 @@ def populateRaces(dbConnection, entries):
             entries
         )
 
-def populateHorses(dbConnection, entries):
+def populateHorses(dbConnection, entries, schema='main'):
     with dbConnection.cursor() as cur:
         cur.execute("SET session_replication_role='replica';")
 
         psycopg2.extras.execute_batch(
             cur,
-            """
-            INSERT INTO main.horses(
+            f"""
+            INSERT INTO {schema}.horses(
                 track,
                 date,
                 race,
@@ -310,7 +310,27 @@ def dictTry(dictionary, keys, listIndices=[], naFlag=True):
 
 ### DEBUG
 if __name__ == '__main__':
-    entries = generateEntries('C:/Users/jackk/Projects/horseData/charts/txts')
+    import json
+    from usefulkarisch.fastFunctions import argParseDriver, parseStrToBool
+    from dataClean.prepForSQL import prepEntriesForSQL
+
+    args = argParseDriver(
+        keywords=['schema', 'calculateEntries'],
+        defaults={
+            'schema': 'test',
+            'calculateEntries': 'false'
+        }
+    )
+
+    calculateEntries = parseStrToBool(args.calculateEntries)
+    if calculateEntries:
+        entries = generateEntries('C:/Users/jackk/Projects/horseData/charts/txts')
+    else:
+        with open('C:/Users/jackk/Projects/horseData/outputs/entries.json', 'r') as file:
+            entries = json.loads(file.read())
+
+    entries = prepEntriesForSQL(entries)
+
     conn = psycopg2.connect(
         host = "localhost",
         database = "horses",
@@ -319,7 +339,7 @@ if __name__ == '__main__':
         port = 5432
     )
 
-    populateDB(conn, entries)
+    populateDB(conn, entries, schema=args.schema)
 
     conn.commit()
 

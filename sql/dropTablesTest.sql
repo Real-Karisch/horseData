@@ -1,0 +1,2 @@
+DROP TABLE test.horses CASCADE;
+DROP TABLE test.races CASCADE;
