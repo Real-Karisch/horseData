@@ -39,14 +39,29 @@ def generateRaceUrlsFromLinks(dayList):
         urls.append(first + raw[trackIndex[0]:trackIndex[1]] + second + raw[countryIndex[0]:countryIndex[1]] + third + raw[dateIndex[0]:dateIndex[1]] + fourth)
     return urls
 
-
-def saveRaceUrlsFromFiles(filesAddress, csvSaveLocation='C:/Users/jackk/Projects/horseData/excel/raceUrls.csv'):
+def generateRaceUrlsFromFiles(filesAddress, csvSaveLocation=None):
     files = os.listdir(filesAddress)
-    urls = []
+    raceInfo = {
+        'track': [],
+        'date': [],
+        'url': []
+    }
     for file in files:
-        dayLinks = getLinks(filesAddress+file, 'eqbPDFChartPlusIndex.cfm\?tid=')
-        urls += generateRaceUrlsFromLinks(dayLinks)
+        dayLinks = getLinks(filesAddress+file, r'eqbPDFChartPlusIndex.cfm\?tid=')
+        trackUrls = generateRaceUrlsFromLinks(dayLinks)
+
+        for trackUrl in trackUrls:
+            search = re.search(r"P=P\&TID=([A-Z]+)\&CTRY=[A-Z]+\&DT=(\d\d/\d\d/\d\d\d\d)", trackUrl)
+            track = search.group(1)
+            dateStr = search.group(2)
+            date = pd.to_datetime(dateStr)
+            raceInfo['track'].append(track)
+            raceInfo['date'].append(date.strftime('%m/%d/%Y'))
+            raceInfo['url'].append(trackUrl)
     
-    with open(csvSaveLocation, 'w') as file:
-        for item in urls:
-            file.write('%s\n' % item)
+    raceInfoDf = pd.DataFrame(raceInfo)
+
+    if csvSaveLocation is not None:
+        raceInfoDf.to_csv(csvSaveLocation, index=False)
+    else:
+        return raceInfoDf

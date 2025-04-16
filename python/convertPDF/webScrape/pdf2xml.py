@@ -12,8 +12,11 @@ def pdf2xml(pdfDir, xmlDir):
 
     print('Converting ', str(len(files)), 'files')
     for file in files:
-        if re.search(r'\.pdf', file) is None or re.sub('pdf', 'txt', file) in alreadyRun:
-            print(f"Skipping {file}.")
+        if re.search(r'\.pdf', file) is None:
+            print(f"Skipping {file} because it is not a pdf.")
+            continue
+        if re.sub('pdf', 'txt', file) in alreadyRun:
+            #print(f"Skipping {file} because it has already been run.")
             continue
         address = f"'{pdfDir}{file}'"
         output = f"'{xmlDir}{re.sub('pdf', 'txt', file)}'"

@@ -87,7 +87,7 @@ rlBottomLineSearchPattern = r'^ (' + horseProgramPattern + r') [^0-9]+ (' + hors
 ### ENDITEMSFNS
 trainerLinePattern = r'^ Trainers:'
 ownerLinePattern = r'^ Owners:'
-footnoteLinePattern = r'^ Footnotes$'
+footnoteLinePattern = r'^ Footnotes($| \|)'
 
 trainerFullSearchPattern = r'( \d?\d - [^;]+;)+'
 trainerShortSearchPattern = r'(\d?\d) - (.+)$'

@@ -14,8 +14,8 @@ def generateEntries(txtFolderAddress):
 
     alreadyPulled = []
     for fileName in fileNames:
-        #if fileCnt > 600:
-        #   print(fileName)
+        if fileCnt >= 999999999999:
+           print(fileName)
         if fileCnt % 300 == 0:
             print(fileCnt)
         fileCnt += 1
@@ -331,11 +331,14 @@ if __name__ == '__main__':
 
     entries = prepEntriesForSQL(entries)
 
+    with open('C:/Users/jackk/Projects/horseData/postgresPassword.txt', 'r') as file:
+        postgresPassword = file.read()
+
     conn = psycopg2.connect(
         host = "localhost",
         database = "horses",
         user = "karisch",
-        password = "cocacola",
+        password = postgresPassword,
         port = 5432
     )
 
