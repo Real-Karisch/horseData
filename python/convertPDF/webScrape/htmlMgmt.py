@@ -2,6 +2,12 @@ import os
 import re
 import pandas as pd
 from bs4 import BeautifulSoup
+from datetime import timedelta
+
+if __name__ == '__main__':
+    from generateDayLinks import generateDayLink
+else:
+    from .generateDayLinks import generateDayLink
 
 def renameHtml(folderAddress):
     fileNames = os.listdir(folderAddress)
@@ -54,3 +60,26 @@ def generateTrackKey(htmlFileAddress, outputCsvAddress):
 
     outdf = pd.DataFrame(out)
     outdf.to_csv(outputCsvAddress + '/tracks.csv', index=False)
+
+def generateLinksForMissingDays(folderAddress, startDate, endDate, csvSaveLocation=None):
+    renameHtml(folderAddress)
+    fileNames = os.listdir(folderAddress)
+    datesGrabbed = [pd.to_datetime(fileName[:-5]) for fileName in fileNames]
+    
+    missingDates = {
+        'date': [],
+        'link': []
+    }
+    activeDate = startDate
+    while activeDate <= endDate:
+        if activeDate not in datesGrabbed:
+            missingDates['date'].append(activeDate)
+            missingDates['link'].append(
+                generateDayLink(activeDate)
+            )
+        activeDate = activeDate + timedelta(days=1)
+    missingDatesDf = pd.DataFrame(missingDates)
+    if csvSaveLocation is not None:
+        missingDatesDf.to_csv(csvSaveLocation, index=False)
+    else:
+        return missingDatesDf
