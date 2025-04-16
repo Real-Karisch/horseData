@@ -101,6 +101,8 @@ if __name__ == '__main__':
         case 'populateSchema':
             if args.schema is None:
                 schema = input('Which schema? Enter "test" or "main".\n')
+            else:
+                schema = args.schema
             conn = psycopg2.connect(
                 host = "localhost",
                 database = "horses",
@@ -111,7 +113,9 @@ if __name__ == '__main__':
             with open(variables['entriesJsonAddress'], 'r') as file:
                 entries = prepEntriesForSQL(json.loads(file.read()))
             populateDB(
-                dbConnection=variables['sqlConnection'],
+                dbConnection=conn,
                 entries=entries,
                 schema=schema
             )
+            conn.commit()
+            conn.close()
